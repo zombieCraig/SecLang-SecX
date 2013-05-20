@@ -17,7 +17,7 @@ class SecVar
 
 end
 
-class IntVar
+class IntVar < SecVar
   attr_accessor :value
   attr_reader :type
 
@@ -35,7 +35,7 @@ class IntVar
   end
 end
 
-class StringVar
+class StringVar < SecVar
   attr_accessor :value
   attr_reader :type, :mode
 
@@ -96,3 +96,31 @@ class StringVar
   end
 end
 
+class IPv4Var < SecVar
+  attr_accessor :value
+  attr_reader :type, :mode
+
+  def initialize(val)
+    @value = val
+    @type = :ipv4
+    @mode = "N/A"
+  end
+
+  def inc(pos = 3)
+    oct = @value.split(".")
+    if pos < 0 then
+      @value = "0.0.0.0"
+      return @value
+    end
+    if oct[pos].to_i == 255 then
+      oct[pos] = 0
+      pos -= 1
+      @value = oct.join(".")
+      self.inc(pos)
+    else
+      oct[pos] = oct[pos].to_i + 1
+      @value = oct.join(".")
+    end
+    @value
+  end
+end

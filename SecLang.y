@@ -133,6 +133,11 @@ variable_assignment:
           {
 		result = add_var(val[0], StringVar.new(val[2]))
           }
+          |
+          VAR EQUAL IPV4ADDR
+          {
+		result = add_var(val[0], IPv4Var.new(val[2]))
+          }
           ;
 
 quotedtext:
@@ -210,6 +215,8 @@ require "./SecVar"
               tokens.push [:ORTOK, m]
             when m = scanner.scan(/&&/)
               tokens.push [:ANDTOK, m]
+            when m = scanner.scan(/(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/)
+              tokens.push [:IPV4ADDR, m]
             when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
               tokens.push [:SYMBOL, m]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\+\+/)
