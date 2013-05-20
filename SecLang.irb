@@ -1,0 +1,24 @@
+#!/usr/bin/ruby
+# Test for SecLang
+
+require "./SecLang.tab"
+
+l = SecLang.new
+
+if ARGV[0] then
+  script = File.read(ARGV[0])
+  script.each_line do |line|
+     l.parse line
+  end
+else
+  quit = false
+  while not quit
+    print "> "
+    line = gets
+    if line=~/^quit/ then
+      quit = true
+    else
+      l.parse line
+    end
+  end
+end
