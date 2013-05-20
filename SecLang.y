@@ -43,6 +43,12 @@ command:
            |
            type_cmd
            |
+           get_mode_cmd
+           |
+           set_mode_cmd
+           |
+           varinc_cmd
+           |
            variable_assignment
 	   ;
 
@@ -93,6 +99,27 @@ type_cmd:
           TYPETOK LPAREN VAR RPAREN
           {
 		result = var_type(val[2])
+          }
+          ;
+
+set_mode_cmd:
+          SETMODETOK LPAREN VAR COMMA SYMBOL RPAREN
+          {
+		result = var_set_mode(val[2], val[4])
+          }
+          ;
+
+get_mode_cmd:
+          GETMODETOK LPAREN VAR RPAREN
+          {
+		result = var_get_mode(val[2])
+          }
+          ;
+
+varinc_cmd:
+          VARINCTOK
+          {
+		result = var_inc(val[0])
           }
           ;
 
@@ -159,6 +186,10 @@ require "./SecVar"
               tokens.push [:PRINTTOK, m]
             when m = scanner.scan(/type/)
               tokens.push [:TYPETOK, m]
+            when m = scanner.scan(/mode/)
+              tokens.push [:GETMODETOK, m]
+            when m = scanner.scan(/set_mode/)
+              tokens.push [:SETMODETOK, m]
             when m = scanner.scan(/\(/)
               tokens.push [:LPAREN, m]
             when m = scanner.scan(/\)/)
@@ -179,6 +210,10 @@ require "./SecVar"
               tokens.push [:ORTOK, m]
             when m = scanner.scan(/&&/)
               tokens.push [:ANDTOK, m]
+            when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
+              tokens.push [:SYMBOL, m]
+            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\+\+/)
+              tokens.push [:VARINCTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*/)
               tokens.push [:VAR, m]
             when m = scanner.scan(/\d+/)
@@ -234,11 +269,41 @@ require "./SecVar"
   end
 
   def var_value(name)
-    @var[name].value
+    if @var.has_key? name
+      @var[name].value
+    else
+     raise ParseError, "#{name} not assigned"
+    end
   end
 
   def var_type(name)
     @var[name].type.to_s
+  end
+
+  def var_inc(name)
+    name = name.gsub(/\+\+$/, "")
+    if @var.has_key? name then
+      @var[name].inc
+    else
+      raise ParseError, "#{name} not assigned"
+    end
+    @var[name].value
+  end
+
+  def var_get_mode(name)
+    if not @var.has_key? name then
+      raise ParseError, "#{name} not assigned"
+    end
+    @var[name].mode
+  end
+
+  def var_set_mode(name, mode)
+    if @var.has_key? name then
+      @var[name].set_mode mode
+    else
+      raise ParseError, "#{name} not assigned"
+    end
+    @var[name].mode
   end
 
 ---- footer ----

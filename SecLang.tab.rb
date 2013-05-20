@@ -14,7 +14,7 @@ require "./SecVar"
 
 class SecLang < Racc::Parser
 
-module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 132)
+module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 159)
   def initialize
     @syntax_check = false
     @var = {}
@@ -45,6 +45,10 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 132)
               tokens.push [:PRINTTOK, m]
             when m = scanner.scan(/type/)
               tokens.push [:TYPETOK, m]
+            when m = scanner.scan(/mode/)
+              tokens.push [:GETMODETOK, m]
+            when m = scanner.scan(/set_mode/)
+              tokens.push [:SETMODETOK, m]
             when m = scanner.scan(/\(/)
               tokens.push [:LPAREN, m]
             when m = scanner.scan(/\)/)
@@ -65,6 +69,10 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 132)
               tokens.push [:ORTOK, m]
             when m = scanner.scan(/&&/)
               tokens.push [:ANDTOK, m]
+            when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
+              tokens.push [:SYMBOL, m]
+            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\+\+/)
+              tokens.push [:VARINCTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*/)
               tokens.push [:VAR, m]
             when m = scanner.scan(/\d+/)
@@ -120,104 +128,154 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 132)
   end
 
   def var_value(name)
-    @var[name].value
+    if @var.has_key? name
+      @var[name].value
+    else
+     raise ParseError, "#{name} not assigned"
+    end
   end
 
   def var_type(name)
     @var[name].type.to_s
   end
 
+  def var_inc(name)
+    name = name.gsub(/\+\+$/, "")
+    if @var.has_key? name then
+      @var[name].inc
+    else
+      raise ParseError, "#{name} not assigned"
+    end
+    @var[name].value
+  end
+
+  def var_get_mode(name)
+    if not @var.has_key? name then
+      raise ParseError, "#{name} not assigned"
+    end
+    @var[name].mode
+  end
+
+  def var_set_mode(name, mode)
+    if @var.has_key? name then
+      @var[name].set_mode mode
+    else
+      raise ParseError, "#{name} not assigned"
+    end
+    @var[name].mode
+  end
+
 ...end SecLang.y/module_eval...
 ##### State transition tables begin ###
 
 racc_action_table = [
-     2,    17,    18,    30,     6,    11,     2,    14,    12,    13,
-     6,    11,     2,    14,    12,    13,     6,    11,     2,    14,
-    12,    13,     6,    11,     2,    14,    12,    13,     6,    11,
-     2,    14,    12,    13,     6,    11,    32,    14,    12,    13,
-    11,    22,    23,    12,    13,    35,    24,    36,    25,    11,
-    28,    14,    12,    13,    39,    24,    38,    25,    31,    24,
-    11,    25,    14,    12,    13,    41,    42,    30,    43,    44,
-    45,    46,    29,    15,    49 ]
+     2,    23,    24,    44,     6,    14,    39,    20,    15,    16,
+    17,     2,    38,    18,    19,     6,    14,    38,    20,    15,
+    16,    17,     2,    43,    18,    19,     6,    14,    40,    20,
+    15,    16,    17,     2,    46,    18,    19,     6,    14,    47,
+    20,    15,    16,    17,     2,    48,    18,    19,     6,    14,
+    37,    20,    15,    16,    17,     2,    36,    18,    19,     6,
+    14,    53,    20,    15,    16,    17,    51,    52,    18,    19,
+    14,    28,    29,    15,    16,    17,    54,    55,    18,    19,
+    56,    30,    57,    31,    14,    34,    20,    15,    16,    17,
+    49,    58,    18,    19,    35,    30,    21,    31,    61,    62,
+    30,    14,    31,    20,    15,    16,    17,    63,   nil,    18,
+    19 ]
 
 racc_action_check = [
-     0,     3,     3,    23,     0,     0,    42,     0,     0,     0,
-    42,    42,     2,    42,    42,    42,     2,     2,    18,     2,
-     2,     2,    18,    18,    41,    18,    18,    18,    41,    41,
-    17,    41,    41,    41,    17,    17,    16,    17,    17,    17,
-    11,    11,    11,    11,    11,    24,    11,    25,    11,    12,
-    12,    12,    12,    12,    30,    12,    29,    12,    15,    30,
-     6,    30,     6,     6,     6,    32,    32,    14,    35,    36,
-    37,    38,    13,     1,    45 ]
+     0,     3,     3,    31,     0,     0,    21,     0,     0,     0,
+     0,    52,    20,     0,     0,    52,    52,    29,    52,    52,
+    52,    52,     2,    30,    52,    52,     2,     2,    22,     2,
+     2,     2,     2,    24,    35,     2,     2,    24,    24,    36,
+    24,    24,    24,    24,    51,    37,    24,    24,    51,    51,
+    18,    51,    51,    51,    51,    23,    17,    51,    51,    23,
+    23,    43,    23,    23,    23,    23,    40,    40,    23,    23,
+    14,    14,    14,    14,    14,    14,    44,    45,    14,    14,
+    46,    14,    47,    14,    15,    15,    15,    15,    15,    15,
+    38,    48,    15,    15,    16,    15,     1,    15,    55,    57,
+    38,     6,    38,     6,     6,     6,     6,    62,   nil,     6,
+     6 ]
 
 racc_action_pointer = [
-    -2,    73,    10,    -3,   nil,   nil,    53,   nil,   nil,   nil,
-   nil,    33,    42,    70,    55,    58,    33,    28,    16,   nil,
-   nil,   nil,   nil,    -9,    31,    33,   nil,   nil,   nil,    47,
-    46,   nil,    61,   nil,   nil,    55,    54,    60,    68,   nil,
-   nil,    22,     4,   nil,   nil,    65,   nil,   nil,   nil,   nil ]
+    -2,    96,    20,    -3,   nil,   nil,    94,   nil,   nil,   nil,
+   nil,   nil,   nil,   nil,    63,    77,    92,    54,    48,   nil,
+    -5,     6,    25,    53,    31,   nil,   nil,   nil,   nil,     0,
+     4,   -16,   nil,   nil,   nil,    25,    30,    36,    82,   nil,
+    62,   nil,   nil,    43,    56,    67,    77,    69,    88,   nil,
+   nil,    42,     9,   nil,   nil,    89,   nil,    85,   nil,   nil,
+   nil,   nil,   104,   nil ]
 
 racc_action_default = [
-    -1,   -27,    -1,    -6,    -7,    -8,   -27,   -10,   -11,   -12,
-   -13,   -27,   -27,   -27,   -27,   -27,   -27,    -1,    -1,    -9,
-   -14,   -15,   -16,   -17,   -27,   -27,   -18,   -19,   -20,   -27,
-   -27,    50,   -27,    -4,    -5,   -27,   -27,   -27,   -27,   -23,
-   -24,    -1,    -1,   -25,   -26,   -27,   -22,    -2,    -3,   -21 ]
+    -1,   -33,    -1,    -6,    -7,    -8,   -33,   -10,   -11,   -12,
+   -13,   -14,   -15,   -16,   -33,   -33,   -33,   -33,   -33,   -28,
+   -33,   -33,   -33,    -1,    -1,    -9,   -17,   -18,   -19,   -20,
+   -33,   -33,   -21,   -22,   -23,   -33,   -33,   -33,   -33,    64,
+   -33,    -4,    -5,   -33,   -33,   -33,   -33,   -33,   -33,   -29,
+   -30,    -1,    -1,   -31,   -32,   -33,   -25,   -33,   -27,    -2,
+    -3,   -24,   -33,   -26 ]
 
 racc_goto_table = [
-     1,    19,    16,    21,    27,    37,    20,    26,   nil,   nil,
-   nil,   nil,   nil,   nil,   nil,   nil,   nil,    33,    34,   nil,
-   nil,   nil,    40,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+     1,    25,    22,    27,    33,    45,   nil,   nil,   nil,    26,
+    32,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,   nil,   nil,    41,    42,   nil,   nil,    50,   nil,   nil,
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,    47,    48 ]
+   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,    59,    60 ]
 
 racc_goto_check = [
-     1,     3,     1,     9,     9,    10,     3,     3,   nil,   nil,
-   nil,   nil,   nil,   nil,   nil,   nil,   nil,     1,     1,   nil,
-   nil,   nil,     9,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+     1,     3,     1,    12,    12,    13,   nil,   nil,   nil,     3,
+     3,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,   nil,   nil,     1,     1,   nil,   nil,    12,   nil,   nil,
+   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
    nil,     1,     1 ]
 
 racc_goto_pointer = [
-   nil,     0,   nil,    -5,   nil,   nil,   nil,   nil,   nil,    -8,
-   -23 ]
+   nil,     0,   nil,    -5,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,   nil,   -11,   -29 ]
 
 racc_goto_default = [
-   nil,   nil,     3,     4,     5,     7,     8,     9,    10,   nil,
-   nil ]
+   nil,   nil,     3,     4,     5,     7,     8,     9,    10,    11,
+    12,    13,   nil,   nil ]
 
 racc_reduce_table = [
   0, 0, :racc_error,
-  0, 17, :_reduce_1,
-  5, 17, :_reduce_2,
-  5, 17, :_reduce_3,
-  3, 17, :_reduce_4,
-  3, 17, :_reduce_5,
-  1, 17, :_reduce_none,
-  1, 18, :_reduce_none,
-  1, 18, :_reduce_none,
-  2, 20, :_reduce_9,
-  1, 19, :_reduce_none,
-  1, 19, :_reduce_none,
-  1, 19, :_reduce_none,
-  1, 19, :_reduce_none,
-  2, 21, :_reduce_14,
-  2, 21, :_reduce_15,
-  2, 21, :_reduce_16,
-  2, 21, :_reduce_17,
-  2, 22, :_reduce_18,
-  2, 22, :_reduce_19,
-  0, 26, :_reduce_20,
-  5, 22, :_reduce_21,
-  4, 23, :_reduce_22,
-  3, 24, :_reduce_23,
-  3, 24, :_reduce_24,
-  3, 25, :_reduce_25,
-  3, 25, :_reduce_26 ]
+  0, 22, :_reduce_1,
+  5, 22, :_reduce_2,
+  5, 22, :_reduce_3,
+  3, 22, :_reduce_4,
+  3, 22, :_reduce_5,
+  1, 22, :_reduce_none,
+  1, 23, :_reduce_none,
+  1, 23, :_reduce_none,
+  2, 25, :_reduce_9,
+  1, 24, :_reduce_none,
+  1, 24, :_reduce_none,
+  1, 24, :_reduce_none,
+  1, 24, :_reduce_none,
+  1, 24, :_reduce_none,
+  1, 24, :_reduce_none,
+  1, 24, :_reduce_none,
+  2, 26, :_reduce_17,
+  2, 26, :_reduce_18,
+  2, 26, :_reduce_19,
+  2, 26, :_reduce_20,
+  2, 27, :_reduce_21,
+  2, 27, :_reduce_22,
+  0, 34, :_reduce_23,
+  5, 27, :_reduce_24,
+  4, 28, :_reduce_25,
+  6, 30, :_reduce_26,
+  4, 29, :_reduce_27,
+  1, 31, :_reduce_28,
+  3, 32, :_reduce_29,
+  3, 32, :_reduce_30,
+  3, 33, :_reduce_31,
+  3, 33, :_reduce_32 ]
 
-racc_reduce_n = 27
+racc_reduce_n = 33
 
-racc_shift_n = 50
+racc_shift_n = 64
 
 racc_token_table = {
   false => 0,
@@ -232,12 +290,17 @@ racc_token_table = {
   :VAR => 9,
   :PRINTTOK => 10,
   :TYPETOK => 11,
-  :EQUAL => 12,
-  :QUOTE => 13,
-  :DATA => 14,
-  :SINGLE_QUOTE => 15 }
+  :SETMODETOK => 12,
+  :COMMA => 13,
+  :SYMBOL => 14,
+  :GETMODETOK => 15,
+  :VARINCTOK => 16,
+  :EQUAL => 17,
+  :QUOTE => 18,
+  :DATA => 19,
+  :SINGLE_QUOTE => 20 }
 
-racc_nt_base = 16
+racc_nt_base = 21
 
 racc_use_result_var = true
 
@@ -270,6 +333,11 @@ Racc_token_to_s_table = [
   "VAR",
   "PRINTTOK",
   "TYPETOK",
+  "SETMODETOK",
+  "COMMA",
+  "SYMBOL",
+  "GETMODETOK",
+  "VARINCTOK",
   "EQUAL",
   "QUOTE",
   "DATA",
@@ -282,6 +350,9 @@ Racc_token_to_s_table = [
   "puts_cmd",
   "print_cmd",
   "type_cmd",
+  "get_mode_cmd",
+  "set_mode_cmd",
+  "varinc_cmd",
   "variable_assignment",
   "quotedtext",
   "@1" ]
@@ -353,104 +424,134 @@ module_eval(<<'.,.,', 'SecLang.y', 34)
 
 # reduce 13 omitted
 
-module_eval(<<'.,.,', 'SecLang.y', 51)
-  def _reduce_14(val, _values, result)
+# reduce 14 omitted
+
+# reduce 15 omitted
+
+# reduce 16 omitted
+
+module_eval(<<'.,.,', 'SecLang.y', 57)
+  def _reduce_17(val, _values, result)
     		result = puts(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 56)
-  def _reduce_15(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 62)
+  def _reduce_18(val, _values, result)
      		result = puts(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 61)
-  def _reduce_16(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 67)
+  def _reduce_19(val, _values, result)
     		result = puts(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 66)
-  def _reduce_17(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 72)
+  def _reduce_20(val, _values, result)
     		result = puts(var_value(val[1]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 73)
-  def _reduce_18(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 79)
+  def _reduce_21(val, _values, result)
     		result = print(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 78)
-  def _reduce_19(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 84)
+  def _reduce_22(val, _values, result)
     		result = print(val[1])
 	  
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 83)
-  def _reduce_20(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 89)
+  def _reduce_23(val, _values, result)
     		result = print(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 87)
-  def _reduce_21(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 93)
+  def _reduce_24(val, _values, result)
     		result = print(var_value(val[1]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 94)
-  def _reduce_22(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 100)
+  def _reduce_25(val, _values, result)
     		result = var_type(val[2])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 101)
-  def _reduce_23(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 107)
+  def _reduce_26(val, _values, result)
+    		result = var_set_mode(val[2], val[4])
+          
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'SecLang.y', 114)
+  def _reduce_27(val, _values, result)
+    		result = var_get_mode(val[2])
+          
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'SecLang.y', 121)
+  def _reduce_28(val, _values, result)
+    		result = var_inc(val[0])
+          
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'SecLang.y', 128)
+  def _reduce_29(val, _values, result)
     		result = add_var(val[0], IntVar.new(val[2]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 106)
-  def _reduce_24(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 133)
+  def _reduce_30(val, _values, result)
     		result = add_var(val[0], StringVar.new(val[2]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 113)
-  def _reduce_25(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 140)
+  def _reduce_31(val, _values, result)
     		result = val[1]
          
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 117)
-  def _reduce_26(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 144)
+  def _reduce_32(val, _values, result)
     		result = val[1]
          
     result
