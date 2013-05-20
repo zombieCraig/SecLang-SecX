@@ -47,6 +47,8 @@ command:
            |
            set_mode_cmd
            |
+           vardec_cmd
+           |
            varinc_cmd
            |
            variable_assignment
@@ -113,6 +115,13 @@ get_mode_cmd:
           GETMODETOK LPAREN VAR RPAREN
           {
 		result = var_get_mode(val[2])
+          }
+          ;
+
+vardec_cmd:
+          VARDECTOK
+          {
+		result = var_dec(val[0])
           }
           ;
 
@@ -219,6 +228,8 @@ require "./SecVar"
               tokens.push [:IPV4ADDR, m]
             when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
               tokens.push [:SYMBOL, m]
+            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\-\-/)
+              tokens.push [:VARDECTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\+\+/)
               tokens.push [:VARINCTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*/)
@@ -285,6 +296,16 @@ require "./SecVar"
 
   def var_type(name)
     @var[name].type.to_s
+  end
+
+  def var_dec(name)
+    name = name.gsub(/\-\-$/, "")
+    if @var.has_key? name then
+      @var[name].dec
+    else
+      raise ParseError, "#{name} not assigned"
+    end
+    @var[name].value
   end
 
   def var_inc(name)

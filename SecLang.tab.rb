@@ -14,7 +14,7 @@ require "./SecVar"
 
 class SecLang < Racc::Parser
 
-module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 164)
+module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 173)
   def initialize
     @syntax_check = false
     @var = {}
@@ -73,6 +73,8 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 164)
               tokens.push [:IPV4ADDR, m]
             when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
               tokens.push [:SYMBOL, m]
+            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\-\-/)
+              tokens.push [:VARDECTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\+\+/)
               tokens.push [:VARINCTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*/)
@@ -141,6 +143,16 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 164)
     @var[name].type.to_s
   end
 
+  def var_dec(name)
+    name = name.gsub(/\-\-$/, "")
+    if @var.has_key? name then
+      @var[name].dec
+    else
+      raise ParseError, "#{name} not assigned"
+    end
+    @var[name].value
+  end
+
   def var_inc(name)
     name = name.gsub(/\+\+$/, "")
     if @var.has_key? name then
@@ -171,114 +183,118 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 164)
 ##### State transition tables begin ###
 
 racc_action_table = [
-     2,    52,    53,    44,     6,    14,    39,    20,    15,    16,
-    17,     2,    38,    18,    19,     6,    14,    38,    20,    15,
-    16,    17,     2,    43,    18,    19,     6,    14,    40,    20,
-    15,    16,    17,     2,    46,    18,    19,     6,    14,    47,
-    20,    15,    16,    17,     2,    48,    18,    19,     6,    14,
-    37,    20,    15,    16,    17,    23,    24,    18,    19,    14,
-    28,    29,    15,    16,    17,    36,    54,    18,    19,    55,
-     2,    30,    56,    31,     6,    14,    57,    20,    15,    16,
-    17,    58,    59,    18,    19,    14,    34,    20,    15,    16,
-    17,    49,    35,    18,    19,    21,    62,    30,    63,    31,
-    64,    51,    30,    14,    31,    20,    15,    16,    17,   nil,
-   nil,    18,    19 ]
+     2,    54,    55,    46,     6,    15,    41,    22,    16,    17,
+    18,    40,     2,    19,    20,    21,     6,    15,    40,    22,
+    16,    17,    18,    45,     2,    19,    20,    21,     6,    15,
+    42,    22,    16,    17,    18,    48,     2,    19,    20,    21,
+     6,    15,    49,    22,    16,    17,    18,    50,     2,    19,
+    20,    21,     6,    15,    39,    22,    16,    17,    18,    25,
+    26,    19,    20,    21,    15,    30,    31,    16,    17,    18,
+    38,    56,    19,    20,    21,    57,     2,    32,    58,    33,
+     6,    15,    59,    22,    16,    17,    18,    60,    61,    19,
+    20,    21,    15,    36,    22,    16,    17,    18,    51,    37,
+    19,    20,    21,    23,    64,    32,    65,    33,    66,    53,
+    32,    15,    33,    22,    16,    17,    18,   nil,   nil,    19,
+    20,    21 ]
 
 racc_action_check = [
-     0,    40,    40,    31,     0,     0,    21,     0,     0,     0,
-     0,    53,    20,     0,     0,    53,    53,    29,    53,    53,
-    53,    53,     2,    30,    53,    53,     2,     2,    22,     2,
-     2,     2,     2,    23,    35,     2,     2,    23,    23,    36,
-    23,    23,    23,    23,    24,    37,    23,    23,    24,    24,
-    18,    24,    24,    24,    24,     3,     3,    24,    24,    14,
-    14,    14,    14,    14,    14,    17,    43,    14,    14,    44,
-    52,    14,    45,    14,    52,    52,    46,    52,    52,    52,
-    52,    47,    48,    52,    52,    15,    15,    15,    15,    15,
-    15,    38,    16,    15,    15,     1,    56,    15,    58,    15,
-    63,    38,    38,     6,    38,     6,     6,     6,     6,   nil,
-   nil,     6,     6 ]
+     0,    42,    42,    33,     0,     0,    23,     0,     0,     0,
+     0,    22,    55,     0,     0,     0,    55,    55,    31,    55,
+    55,    55,    55,    32,     2,    55,    55,    55,     2,     2,
+    24,     2,     2,     2,     2,    37,    25,     2,     2,     2,
+    25,    25,    38,    25,    25,    25,    25,    39,    26,    25,
+    25,    25,    26,    26,    19,    26,    26,    26,    26,     3,
+     3,    26,    26,    26,    15,    15,    15,    15,    15,    15,
+    18,    45,    15,    15,    15,    46,    54,    15,    47,    15,
+    54,    54,    48,    54,    54,    54,    54,    49,    50,    54,
+    54,    54,    16,    16,    16,    16,    16,    16,    40,    17,
+    16,    16,    16,     1,    58,    16,    60,    16,    65,    40,
+    40,     6,    40,     6,     6,     6,     6,   nil,   nil,     6,
+     6,     6 ]
 
 racc_action_pointer = [
-    -2,    95,    20,    51,   nil,   nil,    96,   nil,   nil,   nil,
-   nil,   nil,   nil,   nil,    52,    78,    90,    63,    48,   nil,
-    -5,     6,    25,    31,    42,   nil,   nil,   nil,   nil,     0,
-     3,   -17,   nil,   nil,   nil,    25,    30,    36,    83,   nil,
-    -3,   nil,   nil,    47,    48,    62,    73,    68,    79,   nil,
-   nil,   nil,    68,     9,   nil,   nil,    87,   nil,    84,   nil,
-   nil,   nil,   nil,    97,   nil ]
+    -2,   103,    22,    55,   nil,   nil,   104,   nil,   nil,   nil,
+   nil,   nil,   nil,   nil,   nil,    57,    85,    97,    68,    52,
+   nil,   nil,    -7,     6,    27,    34,    46,   nil,   nil,   nil,
+   nil,     0,     2,   -18,   nil,   nil,   nil,    26,    33,    38,
+    90,   nil,    -3,   nil,   nil,    51,    53,    68,    79,    74,
+    85,   nil,   nil,   nil,    74,    10,   nil,   nil,    95,   nil,
+    92,   nil,   nil,   nil,   nil,   105,   nil ]
 
 racc_action_default = [
-    -1,   -34,    -1,    -6,    -7,    -8,   -34,   -10,   -11,   -12,
-   -13,   -14,   -15,   -16,   -34,   -34,   -34,   -34,   -34,   -28,
-   -34,   -34,   -34,    -1,    -1,    -9,   -17,   -18,   -19,   -20,
-   -34,   -34,   -21,   -22,   -23,   -34,   -34,   -34,   -34,    65,
-   -34,    -4,    -5,   -34,   -34,   -34,   -34,   -34,   -34,   -29,
-   -30,   -31,    -1,    -1,   -32,   -33,   -34,   -25,   -34,   -27,
-    -2,    -3,   -24,   -34,   -26 ]
+    -1,   -36,    -1,    -6,    -7,    -8,   -36,   -10,   -11,   -12,
+   -13,   -14,   -15,   -16,   -17,   -36,   -36,   -36,   -36,   -36,
+   -29,   -30,   -36,   -36,   -36,    -1,    -1,    -9,   -18,   -19,
+   -20,   -21,   -36,   -36,   -22,   -23,   -24,   -36,   -36,   -36,
+   -36,    67,   -36,    -4,    -5,   -36,   -36,   -36,   -36,   -36,
+   -36,   -31,   -32,   -33,    -1,    -1,   -34,   -35,   -36,   -26,
+   -36,   -28,    -2,    -3,   -25,   -36,   -27 ]
 
 racc_goto_table = [
-     1,    25,    22,    27,    33,    45,   nil,   nil,   nil,    26,
-    32,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,   nil,   nil,    41,    42,   nil,   nil,    50,   nil,   nil,
+     1,    27,    24,    29,    35,    47,   nil,   nil,   nil,   nil,
+    28,    34,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,   nil,   nil,   nil,   nil,    43,    44,   nil,    52,   nil,
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,   nil,    60,    61 ]
+   nil,   nil,   nil,   nil,    62,    63 ]
 
 racc_goto_check = [
-     1,     3,     1,    12,    12,    13,   nil,   nil,   nil,     3,
-     3,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,   nil,   nil,     1,     1,   nil,   nil,    12,   nil,   nil,
+     1,     3,     1,    13,    13,    14,   nil,   nil,   nil,   nil,
+     3,     3,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,   nil,   nil,   nil,   nil,     1,     1,   nil,    13,   nil,
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,   nil,     1,     1 ]
+   nil,   nil,   nil,   nil,     1,     1 ]
 
 racc_goto_pointer = [
    nil,     0,   nil,    -5,   nil,   nil,   nil,   nil,   nil,   nil,
-   nil,   nil,   -11,   -29 ]
+   nil,   nil,   nil,   -12,   -31 ]
 
 racc_goto_default = [
    nil,   nil,     3,     4,     5,     7,     8,     9,    10,    11,
-    12,    13,   nil,   nil ]
+    12,    13,    14,   nil,   nil ]
 
 racc_reduce_table = [
   0, 0, :racc_error,
-  0, 23, :_reduce_1,
-  5, 23, :_reduce_2,
-  5, 23, :_reduce_3,
-  3, 23, :_reduce_4,
-  3, 23, :_reduce_5,
-  1, 23, :_reduce_none,
+  0, 24, :_reduce_1,
+  5, 24, :_reduce_2,
+  5, 24, :_reduce_3,
+  3, 24, :_reduce_4,
+  3, 24, :_reduce_5,
   1, 24, :_reduce_none,
-  1, 24, :_reduce_none,
-  2, 26, :_reduce_9,
   1, 25, :_reduce_none,
   1, 25, :_reduce_none,
-  1, 25, :_reduce_none,
-  1, 25, :_reduce_none,
-  1, 25, :_reduce_none,
-  1, 25, :_reduce_none,
-  1, 25, :_reduce_none,
-  2, 27, :_reduce_17,
-  2, 27, :_reduce_18,
-  2, 27, :_reduce_19,
-  2, 27, :_reduce_20,
+  2, 27, :_reduce_9,
+  1, 26, :_reduce_none,
+  1, 26, :_reduce_none,
+  1, 26, :_reduce_none,
+  1, 26, :_reduce_none,
+  1, 26, :_reduce_none,
+  1, 26, :_reduce_none,
+  1, 26, :_reduce_none,
+  1, 26, :_reduce_none,
+  2, 28, :_reduce_18,
+  2, 28, :_reduce_19,
+  2, 28, :_reduce_20,
   2, 28, :_reduce_21,
-  2, 28, :_reduce_22,
-  0, 35, :_reduce_23,
-  5, 28, :_reduce_24,
-  4, 29, :_reduce_25,
-  6, 31, :_reduce_26,
-  4, 30, :_reduce_27,
-  1, 32, :_reduce_28,
-  3, 33, :_reduce_29,
-  3, 33, :_reduce_30,
-  3, 33, :_reduce_31,
-  3, 34, :_reduce_32,
-  3, 34, :_reduce_33 ]
+  2, 29, :_reduce_22,
+  2, 29, :_reduce_23,
+  0, 37, :_reduce_24,
+  5, 29, :_reduce_25,
+  4, 30, :_reduce_26,
+  6, 32, :_reduce_27,
+  4, 31, :_reduce_28,
+  1, 33, :_reduce_29,
+  1, 34, :_reduce_30,
+  3, 35, :_reduce_31,
+  3, 35, :_reduce_32,
+  3, 35, :_reduce_33,
+  3, 36, :_reduce_34,
+  3, 36, :_reduce_35 ]
 
-racc_reduce_n = 34
+racc_reduce_n = 36
 
-racc_shift_n = 65
+racc_shift_n = 67
 
 racc_token_table = {
   false => 0,
@@ -297,14 +313,15 @@ racc_token_table = {
   :COMMA => 13,
   :SYMBOL => 14,
   :GETMODETOK => 15,
-  :VARINCTOK => 16,
-  :EQUAL => 17,
-  :IPV4ADDR => 18,
-  :QUOTE => 19,
-  :DATA => 20,
-  :SINGLE_QUOTE => 21 }
+  :VARDECTOK => 16,
+  :VARINCTOK => 17,
+  :EQUAL => 18,
+  :IPV4ADDR => 19,
+  :QUOTE => 20,
+  :DATA => 21,
+  :SINGLE_QUOTE => 22 }
 
-racc_nt_base = 22
+racc_nt_base = 23
 
 racc_use_result_var = true
 
@@ -341,6 +358,7 @@ Racc_token_to_s_table = [
   "COMMA",
   "SYMBOL",
   "GETMODETOK",
+  "VARDECTOK",
   "VARINCTOK",
   "EQUAL",
   "IPV4ADDR",
@@ -357,6 +375,7 @@ Racc_token_to_s_table = [
   "type_cmd",
   "get_mode_cmd",
   "set_mode_cmd",
+  "vardec_cmd",
   "varinc_cmd",
   "variable_assignment",
   "quotedtext",
@@ -435,136 +454,146 @@ module_eval(<<'.,.,', 'SecLang.y', 34)
 
 # reduce 16 omitted
 
-module_eval(<<'.,.,', 'SecLang.y', 57)
-  def _reduce_17(val, _values, result)
+# reduce 17 omitted
+
+module_eval(<<'.,.,', 'SecLang.y', 59)
+  def _reduce_18(val, _values, result)
     		result = puts(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 62)
-  def _reduce_18(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 64)
+  def _reduce_19(val, _values, result)
      		result = puts(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 67)
-  def _reduce_19(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 69)
+  def _reduce_20(val, _values, result)
     		result = puts(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 72)
-  def _reduce_20(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 74)
+  def _reduce_21(val, _values, result)
     		result = puts(var_value(val[1]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 79)
-  def _reduce_21(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 81)
+  def _reduce_22(val, _values, result)
     		result = print(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 84)
-  def _reduce_22(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 86)
+  def _reduce_23(val, _values, result)
     		result = print(val[1])
 	  
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 89)
-  def _reduce_23(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 91)
+  def _reduce_24(val, _values, result)
     		result = print(val[1])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 93)
-  def _reduce_24(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 95)
+  def _reduce_25(val, _values, result)
     		result = print(var_value(val[1]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 100)
-  def _reduce_25(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 102)
+  def _reduce_26(val, _values, result)
     		result = var_type(val[2])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 107)
-  def _reduce_26(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 109)
+  def _reduce_27(val, _values, result)
     		result = var_set_mode(val[2], val[4])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 114)
-  def _reduce_27(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 116)
+  def _reduce_28(val, _values, result)
     		result = var_get_mode(val[2])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 121)
-  def _reduce_28(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 123)
+  def _reduce_29(val, _values, result)
+    		result = var_dec(val[0])
+          
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'SecLang.y', 130)
+  def _reduce_30(val, _values, result)
     		result = var_inc(val[0])
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 128)
-  def _reduce_29(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 137)
+  def _reduce_31(val, _values, result)
     		result = add_var(val[0], IntVar.new(val[2]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 133)
-  def _reduce_30(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 142)
+  def _reduce_32(val, _values, result)
     		result = add_var(val[0], StringVar.new(val[2]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 138)
-  def _reduce_31(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 147)
+  def _reduce_33(val, _values, result)
     		result = add_var(val[0], IPv4Var.new(val[2]))
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 145)
-  def _reduce_32(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 154)
+  def _reduce_34(val, _values, result)
     		result = val[1]
          
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 149)
-  def _reduce_33(val, _values, result)
+module_eval(<<'.,.,', 'SecLang.y', 158)
+  def _reduce_35(val, _values, result)
     		result = val[1]
          
     result
