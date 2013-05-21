@@ -12,10 +12,10 @@ class SecVar
     @value.to_s
   end
 
-  def inc
+  def inc(amt=0,pos=0)
   end
 
-  def dec
+  def dec(amt=0,pos=0)
   end
 
 end
@@ -29,11 +29,11 @@ class IntVar < SecVar
     @type = :integer
   end
 
-  def inc(amt = 1)
+  def inc(amt = 1, pos=0)
     @value += amt
   end
 
-  def dec(amt = 1)
+  def dec(amt = 1, pos=0)
     @value -= amt
   end
 
@@ -58,7 +58,7 @@ class StringVar < SecVar
     @charset = @mixed
   end
 
-  def inc(pos = -1, amt = 1)
+  def inc(amt = 1, pos = -1)
     last_char = @value[pos]
     idx = @charset.index(last_char)
     if idx+amt >= @charset.length then
@@ -67,14 +67,14 @@ class StringVar < SecVar
       if pos.abs > @value.length then
         @value = "#{@charset[idx+amt - @charset.length]}#{@value}"
       else
-        self.inc(pos, amt)
+        self.inc(amt, pos)
       end
     else
       @value[pos] = @charset[idx + amt]
     end
   end
 
-  def dec(pos = -1, amt = 1)
+  def dec(amt = 1, pos = -1)
     return "" if @value.size == 0
     last_char = @value[pos]
     idx = @charset.index(last_char)
@@ -84,7 +84,7 @@ class StringVar < SecVar
       if pos.abs > @value.length then
         @value = @value[1, @value.length-1]
       else
-        self.dec(pos, amt)
+        self.dec(amt, pos)
       end
     else
       @value[pos] = @charset[idx - amt]
@@ -122,17 +122,17 @@ class IPv4Var < SecVar
     @mode = "N/A"
   end
 
-  def inc(pos = 3, amt = 1)
+  def inc(amt = 1, pos = 3)
     oct = @value.split(".")
     if pos < 0 then
       @value = "0.0.0.0"
       return @value
     end
-    if oct[pos].to_i == 255 then
-      oct[pos] = 0
+    if oct[pos].to_i + amt > 255 then
+      oct[pos] = oct[pos].to_i + amt - 255
       pos -= 1
       @value = oct.join(".")
-      self.inc(pos)
+      self.inc((amt / 255) + 1, pos)
     else
       oct[pos] = oct[pos].to_i + amt
       @value = oct.join(".")
@@ -140,17 +140,17 @@ class IPv4Var < SecVar
     @value
   end
 
-  def dec(pos = 3, amt = 1)
+  def dec(amt = 1, pos = 3)
     oct = @value.split(".")
     if pos < 0 then
       @value = "255.255.255.255"
       return @value
     end
-    if oct[pos].to_i == 0 then
-      oct[pos] = 255
+    if oct[pos].to_i - amt < 0 then
+      oct[pos] = 255 - oct[pos].to_i - amt
       pos -= 1
       @value = oct.join(".")
-      self.dec(pos)
+      self.dec((amt / 255) + 1, pos)
     else
       oct[pos] = oct[pos].to_i - amt
       @value = oct.join(".")

@@ -12,6 +12,7 @@ rule
            {
              result = val[1] || val[4]
            }
+           | truth_stmt SEMICOLON commands
            | truth_stmt ANDTOK commands
            {
              result = val[0] && val[2]
@@ -163,12 +164,32 @@ vardec_cmd:
           {
 		result = var_dec(val[0])
           }
+          |
+          VAR VARDECAMT DIGITS
+          {
+		result = var_dec(val[0], val[2])
+          }
+          |
+          VAR VARDECAMT VAR
+          {
+             	result = var_dec_var(val[0], val[2])
+          }
           ;
 
 varinc_cmd:
           VARINCTOK
           {
 		result = var_inc(val[0])
+          }
+          |
+          VAR VARINCAMT DIGITS
+          {
+		result = var_inc(val[0], val[2])
+          }
+          |
+          VAR VARINCAMT VAR
+          {
+             	result = var_inc_var(val[0], val[2])
           }
           ;
 
@@ -302,16 +323,22 @@ require "./SecVar"
               tokens.push [:EQUAL, m]
             when m = scanner.scan(/(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/)
               tokens.push [:IPV4ADDR, m]
+            when m = scanner.scan(/\+=/)
+              tokens.push [:VARINCAMT, m]
+            when m = scanner.scan(/-=/)
+              tokens.push [:VARDECAMT, m]
             when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
               tokens.push [:SYMBOL, m]
-            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\-\-/)
+            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*\-\-/)
               tokens.push [:VARDECTOK, m ]
-            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*\+\+/)
+            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*\+\+/)
               tokens.push [:VARINCTOK, m ]
-            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_-]*/)
+            when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*/)
               tokens.push [:VAR, m]
             when m = scanner.scan(/\d+/)
               tokens.push [:DIGITS, m]
+            when m = scanner.scan(/;/)
+              tokens.push [:SEMICOLON, m]
             when scanner.scan(/[ \t\r\n]/)
               # ignore whtiespace
             else
@@ -382,24 +409,44 @@ require "./SecVar"
     @var[name].type.to_s
   end
 
-  def var_dec(name)
+  def var_dec(name, amt=1)
     name = name.gsub(/\-\-$/, "")
     if @var.has_key? name then
-      @var[name].dec
+      @var[name].dec(amt.to_i)
     else
       raise ParseError, "#{name} not assigned"
     end
     @var[name].value
   end
 
-  def var_inc(name)
+  def var_inc(name, amt=1)
     name = name.gsub(/\+\+$/, "")
     if @var.has_key? name then
-      @var[name].inc
+      @var[name].inc(amt.to_i)
     else
       raise ParseError, "#{name} not assigned"
     end
     @var[name].value
+  end
+
+  def var_inc_var(dst_name, src_name)
+    if not @var.has_key? src_name then
+      raise ParseError, "#{src_name} not defined"
+    end
+    if var_type(src_name) != "integer" then
+      raise ParseError, "Can not add #{src_name} of type #{var_type(src_name)}"
+    end
+    var_inc(dst_name, var_value(src_name))
+  end
+
+  def var_dec_var(dst_name, src_name)
+    if not @var.has_key? src_name then
+      raise ParseError, "#{src_name} not defined"
+    end
+    if var_type(src_name) != "integer" then
+      raise ParseError, "Can not add #{src_name} of type #{var_type(src_name)}"
+    end
+    var_dec(dst_name, var_value(src_name))
   end
 
   def var_get_mode(name)
