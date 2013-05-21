@@ -20,6 +20,36 @@ rule
            {
              result = val[0] || val[2]
            }
+           |
+           truth_stmt EQ commands
+           {
+             result = val[0] == val[2]
+           }
+           |
+           truth_stmt GT commands
+           {
+             result = val[0] > val[2]
+           }
+           |
+           truth_stmt LT commands
+           {
+             result = val[0] < val[2]
+           }
+           |
+           truth_stmt LE commands
+           {
+             result = val[0] <= val[2]
+           }
+           |
+           truth_stmt GE commands
+           {
+             result = val[0] >= val[2]
+           }
+           |
+           truth_stmt NE commands
+           {
+             result = val[0] != val[2]
+           }
            | truth_stmt
            ;
 
@@ -27,6 +57,11 @@ truth_stmt:
            command
            |
            not_command
+           |
+           VAR
+           {
+		result = var_value(val[0])
+           }
            ;
 
 not_command:
@@ -52,7 +87,7 @@ command:
            varinc_cmd
            |
            variable_assignment
-	   ;
+           ;
 
 puts_cmd:
           PUTSTOK command
@@ -73,6 +108,11 @@ puts_cmd:
           PUTSTOK VAR
           {
 		result = puts(var_value(val[1]))
+          }
+          |
+          PUTSTOK LPAREN commands RPAREN
+          {
+		result = puts(val[2])
           }
           ;
 
@@ -133,6 +173,24 @@ varinc_cmd:
           ;
 
 variable_assignment:
+          VAR EQUAL command
+          {
+                r = val[2]
+                if r.is_a? SecVar
+                  result = add_var(val[0], r)
+                elsif r.is_a? Integer
+		  result = add_var(val[0], IntVar.new(val[2]))
+                else r.is_a? String
+		  result = add_var(val[0], StringVar.new(val[2]))
+                end
+		result
+          }
+          |
+          VAR EQUAL VAR
+          {
+		result = copy_var(val[0], val[2])
+          }
+          |
           VAR EQUAL DIGITS
           {
 		result = add_var(val[0], IntVar.new(val[2]))
@@ -146,6 +204,12 @@ variable_assignment:
           VAR EQUAL IPV4ADDR
           {
 		result = add_var(val[0], IPv4Var.new(val[2]))
+          }
+          |
+          VAR EQUAL LPAREN commands RPAREN
+          {
+                t = val[3]
+		result = add_var(val[0], StringVar.new(t.to_s))
           }
           ;
 
@@ -216,14 +280,26 @@ require "./SecVar"
               tokens.push [:SINGLE_QUOTE, m]
               last_state.push state
               state = :SINGLE_QUOTED
-            when m = scanner.scan(/=/)
-              tokens.push [:EQUAL, m]
             when m = scanner.scan(/,/)
               tokens.push [:COMMA, m]
+            when m = scanner.scan(/==/)
+              tokens.push [:EQ, m]
+            when m = scanner.scan(/</)
+              tokens.push [:LT, m]
+            when m = scanner.scan(/>/)
+              tokens.push [:GT, m]
+            when m = scanner.scan(/>=/)
+              tokens.push [:GE, m]
+            when m = scanner.scan(/<=/)
+              tokens.push [:LE, m]
+            when m = scanner.scan(/!=/)
+              tokens.push [:NE, m]
             when m = scanner.scan(/\|\|/)
               tokens.push [:ORTOK, m]
             when m = scanner.scan(/&&/)
               tokens.push [:ANDTOK, m]
+            when m = scanner.scan(/=/)
+              tokens.push [:EQUAL, m]
             when m = scanner.scan(/(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/)
               tokens.push [:IPV4ADDR, m]
             when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
@@ -286,6 +362,14 @@ require "./SecVar"
     @var[name] = var
   end
 
+  def copy_var(dst_name, src_name)
+    if not @var.has_key? src_name
+      raise ParseError, "#{src_name} not defined"
+    else
+      @var[dst_name] = @var[src_name].dup
+    end
+  end
+
   def var_value(name)
     if @var.has_key? name
       @var[name].value
@@ -332,6 +416,10 @@ require "./SecVar"
       raise ParseError, "#{name} not assigned"
     end
     @var[name].mode
+  end
+
+  def is_eq?(val1, val2)
+    val1 = val2
   end
 
 ---- footer ----

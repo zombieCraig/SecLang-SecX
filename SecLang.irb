@@ -18,7 +18,11 @@ else
     if line=~/^quit/ then
       quit = true
     else
-      l.parse line
+      begin
+        l.parse line
+      rescue ParseError
+        puts $!
+      end
     end
   end
 end
