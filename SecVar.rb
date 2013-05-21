@@ -58,33 +58,33 @@ class StringVar < SecVar
     @charset = @mixed
   end
 
-  def inc(amt = 1, pos = -1)
+  def inc(amt=1,pos=-1)
     last_char = @value[pos]
     idx = @charset.index(last_char)
     if idx+amt >= @charset.length then
-      @value[pos] = @charset[0]
+      @value[pos] = @charset[idx + amt - @charset.length]
       pos -= 1
       if pos.abs > @value.length then
         @value = "#{@charset[idx+amt - @charset.length]}#{@value}"
       else
-        self.inc(amt, pos)
+        self.inc((amt / @charset.length) + 1, pos)
       end
     else
       @value[pos] = @charset[idx + amt]
     end
   end
 
-  def dec(amt = 1, pos = -1)
+  def dec(amt=1,pos=-1)
     return "" if @value.size == 0
     last_char = @value[pos]
     idx = @charset.index(last_char)
     if idx-amt < 0 then
-      @value[pos] = @charset[@charset.length-1]
+      @value[pos] = @charset[@charset.length - (amt-idx)]
       pos -= 1
       if pos.abs > @value.length then
         @value = @value[1, @value.length-1]
       else
-        self.dec(amt, pos)
+        self.dec((amt / @charset.length) + 1, pos)
       end
     else
       @value[pos] = @charset[idx - amt]
@@ -156,6 +156,35 @@ class IPv4Var < SecVar
       @value = oct.join(".")
     end
     @value
+  end
+
+end
+
+class HexVar < StringVar
+  attr_reader :type, :mode
+
+  def initialize(val)
+    val = val.gsub(/0x/, "")
+    @value = val.downcase
+    @type = :hex
+    @charset = "0123456789abcdef"
+  end
+
+  def to_s
+    "0x#{@value}"
+  end
+
+  def value=(val)
+    val = val.gsub(/0x/, "")
+    @value = val.downcase
+  end
+
+  def value
+    to_s
+  end
+
+  def set_mode(mode)
+    puts "WARNING: mode not supported for Hex Variables"
   end
 
 end

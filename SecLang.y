@@ -227,6 +227,11 @@ variable_assignment:
 		result = add_var(val[0], IPv4Var.new(val[2]))
           }
           |
+          VAR EQUAL HEXVALUE
+          {
+		result = add_var(val[0], HexVar.new(val[2]))
+          }
+          |
           VAR EQUAL LPAREN commands RPAREN
           {
                 t = val[3]
@@ -323,6 +328,8 @@ require "./SecVar"
               tokens.push [:EQUAL, m]
             when m = scanner.scan(/(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/)
               tokens.push [:IPV4ADDR, m]
+            when m = scanner.scan(/0x[0-9a-fA-F]+/)
+              tokens.push [:HEXVALUE, m]
             when m = scanner.scan(/\+=/)
               tokens.push [:VARINCAMT, m]
             when m = scanner.scan(/-=/)
