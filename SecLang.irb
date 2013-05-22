@@ -19,7 +19,8 @@ else
       quit = true
     else
       begin
-        l.parse line
+        v = l.parse line
+        puts " [ #{v} ]" if v
       rescue ParseError
         puts $!
       end

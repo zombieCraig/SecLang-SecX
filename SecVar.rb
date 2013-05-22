@@ -12,6 +12,15 @@ class SecVar
     @value.to_s
   end
 
+  def to_i
+  end
+
+  def add(amt)
+  end
+
+  def sub(amt)
+  end
+
   def inc(amt=0,pos=0)
   end
 
@@ -29,12 +38,24 @@ class IntVar < SecVar
     @type = :integer
   end
 
+  def add(amt)
+    @value + amt.to_i
+  end
+
+  def sub(amt)
+    @value - amt.to_i
+  end
+
   def inc(amt = 1, pos=0)
     @value += amt
   end
 
   def dec(amt = 1, pos=0)
     @value -= amt
+  end
+
+  def to_i
+    @value
   end
 
   def set_mode
@@ -58,16 +79,29 @@ class StringVar < SecVar
     @charset = @mixed
   end
 
+  def to_i
+    @value.to_i
+  end
+
+  def to_i
+    @value.hex.to_i
+  end
+
   def inc(amt=1,pos=-1)
     last_char = @value[pos]
     idx = @charset.index(last_char)
     if idx+amt >= @charset.length then
-      @value[pos] = @charset[idx + amt - @charset.length]
+      idx += amt
+      div = (idx / @charset.length).floor
+      idx -= (@charset.length * div)
+      @value[pos] = @charset[idx]
       pos -= 1
       if pos.abs > @value.length then
         @value = "#{@charset[idx+amt - @charset.length]}#{@value}"
       else
-        self.inc((amt / @charset.length) + 1, pos)
+        amt = (amt / @charset.length).floor
+        amt = 1 if amt == 0
+        self.inc(amt, pos)
       end
     else
       @value[pos] = @charset[idx + amt]
@@ -79,12 +113,17 @@ class StringVar < SecVar
     last_char = @value[pos]
     idx = @charset.index(last_char)
     if idx-amt < 0 then
-      @value[pos] = @charset[@charset.length - (amt-idx)]
+      idx = amt - idx
+      div = (idx / @charset.length).floor
+      idx = (@charset.length * div) - idx
+      @value[pos] = @charset[idx]
       pos -= 1
       if pos.abs > @value.length then
         @value = @value[1, @value.length-1]
       else
-        self.dec((amt / @charset.length) + 1, pos)
+        amt = (amt / @charset.length).floor
+        amt = 1 if amt == 0
+        self.dec(amt, pos)
       end
     else
       @value[pos] = @charset[idx - amt]
@@ -180,7 +219,7 @@ class HexVar < StringVar
   end
 
   def value
-    to_s
+    self.to_s
   end
 
   def set_mode(mode)
