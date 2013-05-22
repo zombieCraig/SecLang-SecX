@@ -51,6 +51,11 @@ rule
            {
              result = val[0] != val[2]
            }
+           |
+           truth_stmt ADD commands
+           {
+             result = @s.var_add_var(val[0], val[2])
+           }
            | truth_stmt
            ;
 
@@ -59,9 +64,29 @@ truth_stmt:
            |
            not_command
            |
+           quotedtext
+           {
+		result = StringVar.new(val[0])
+           }
+           |
+           DIGITS
+           {
+		result = IntVar.new(val[0])
+           }
+           |
            VAR
            {
-		result = @s.var_value(val[0])
+                result = @s.get_var(val[0])
+           }
+           |
+           HEXVALUE
+           {
+		result = HexVar.new(val[0])
+           }
+           |
+           IPV4ADDR
+           {
+		result = IPv4Var.new(val[0])
            }
            ;
 
@@ -86,8 +111,6 @@ command:
            vardec_cmd
            |
            varinc_cmd
-           |
-           add_cmd
            |
            sub_cmd
            |
@@ -194,23 +217,6 @@ varinc_cmd:
           VAR VARINCAMT VAR
           {
              	result = @s.var_inc_var(val[0], val[2])
-          }
-          ;
-
-add_cmd:
-          DIGITS ADD DIGITS
-          {
-		result = @s.add_digits(val[0], val[2])
-          }
-          |
-          VAR ADD DIGITS
-          {
-		result = @s.var_add(val[0], val[2])
-          }
-          |
-          VAR ADD VAR
-          {
-		result = @s.var_add_var(val[0], val[2])
           }
           ;
 

@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 # Test for SecLang
 
+require "readline"
 require "./SecLang.tab"
 
 l = SecLang.new
@@ -13,8 +14,7 @@ if ARGV[0] then
 else
   quit = false
   while not quit
-    print "> "
-    line = gets
+    line = Readline.readline("> ", true)
     if line=~/^quit/ then
       quit = true
     else

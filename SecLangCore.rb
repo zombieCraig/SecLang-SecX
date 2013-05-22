@@ -11,6 +11,13 @@ class SecLangCore
     @var[name] = var
   end
 
+  def get_var(name)
+    if not @var.has_key? name
+      raise ParseError, "#{name} variable not defined"
+    end
+    @var[name]
+  end
+
   def copy_var(dst_name, src_name)
     if not @var.has_key? src_name
       raise ParseError, "#{src_name} not defined"
@@ -28,7 +35,7 @@ class SecLangCore
   end
 
   def var_type(name)
-    @var[name].type.to_s
+    StringVar.new(@var[name].type.to_s)
   end
 
   def var_dec(name, amt=1)
@@ -41,16 +48,9 @@ class SecLangCore
     @var[name].value
   end
 
-  def add_digits(amt1, amt2)
-    IntVar.new(amt1.to_i + amt2.to_i)
-  end
-
   def var_add(name, amt)
-    if not @var.has_key? name then
-      raise ParseError, "#{name} not assigned"
-    end
     amt = amt.to_i
-    var = @var[name]
+    var = name
     case var.type
       when :integer
         v = IntVar.new(var.add(amt))
@@ -69,13 +69,7 @@ class SecLangCore
   end
 
   def var_add_var(name, src_name)
-    if not @var.has_key? name then
-      raise ParseError, "#{name} not assigned"
-    end
-    if not @var.has_key? src_name then
-      raise ParseError, "#{src_name} not assigned"
-    end
-    src = @var[src_name]
+    src = src_name
     amt = src.to_i
     self.var_add(name, amt)
   end
