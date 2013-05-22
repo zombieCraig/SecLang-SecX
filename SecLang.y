@@ -12,6 +12,14 @@ rule
            {
              result = val[1] || val[4]
            }
+           | LPAREN commands RPAREN ADD commands
+           {
+             result = @s.var_add_var(val[1], val[4])
+           }
+           | LPAREN commands RPAREN SUB commands
+           {
+             result = @s.var_sub_var(val[1], val[4])
+           }
            | truth_stmt SEMICOLON commands
            | truth_stmt ANDTOK commands
            {
@@ -55,6 +63,11 @@ rule
            truth_stmt ADD commands
            {
              result = @s.var_add_var(val[0], val[2])
+           }
+           |
+           truth_stmt SUB commands
+           {
+             result = @s.var_sub_var(val[0], val[2])
            }
            | truth_stmt
            ;
@@ -111,8 +124,6 @@ command:
            vardec_cmd
            |
            varinc_cmd
-           |
-           sub_cmd
            |
            variable_assignment
            ;
@@ -217,18 +228,6 @@ varinc_cmd:
           VAR VARINCAMT VAR
           {
              	result = @s.var_inc_var(val[0], val[2])
-          }
-          ;
-
-sub_cmd:
-          VAR SUB DIGITS
-          {
-		result = @s.var_sub(val[0], val[2])
-          }
-          |
-          VAR SUB VAR
-          {
-		result = @s.var_sub_var(val[0], val[2])
           }
           ;
 

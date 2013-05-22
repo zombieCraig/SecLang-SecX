@@ -48,9 +48,8 @@ class SecLangCore
     @var[name].value
   end
 
-  def var_add(name, amt)
+  def var_add(var, amt)
     amt = amt.to_i
-    var = name
     case var.type
       when :integer
         v = IntVar.new(var.add(amt))
@@ -68,20 +67,31 @@ class SecLangCore
     v
   end
 
-  def var_add_var(name, src_name)
-    src = src_name
+  def var_add_var(name, src)
+    raise ParseError, "Improper math reference" if not src
     amt = src.to_i
     self.var_add(name, amt)
   end
 
-  def var_sub(name, amt)
-    if not @var.has_key? name then
-      raise ParseError, "#{name} not assigned"
-    end
-    var = @var[name]
+  def var_sub_var(name, src)
+    raise ParseError, "Improper math reference" if not src
+    amt = src.to_i
+    self.var_sub(name, amt)
+  end
+
+  def var_sub(var, amt)
+    amt = amt.to_i
     case var.type
       when :integer
-        v = IntVar.new(var.sub(amt))
+        v = IntVar.new(var.dec(amt))
+      when :hex
+        v = HexVar.new(var.value)
+        v.dec(amt)
+      when :string
+        v = StringVar.new(var.value)
+        v.dec(amt)
+      when :ipv4
+        v = IPv4Var.new(var.value).dec(amt)
       else
         raise ParseError, "Unhandled variable type #{var.type}"
     end
