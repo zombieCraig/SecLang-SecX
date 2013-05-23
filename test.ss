@@ -1,9 +1,14 @@
+/* SecLang test Script
+ * Runs a series of test
+ * Written in SecLang
+ */
 puts "SecLang test scripts"
 puts "--------------------"
 print "Test "
 print 1
 puts "."
 
+puts "\n" /* Can't handle blank puts yet */
 puts "a = 3"
 a = 3
 puts "b = 0x90"
@@ -13,6 +18,7 @@ c = "Test"
 puts "d = 10.10.10.10"
 d = 10.10.10.10
 
+puts "\n"
 print "a + b = "
 r = a + b
 puts r 
@@ -37,3 +43,11 @@ print "a + d = "
 r = a + d
 puts r
 puts r == 3
+print "d + b = "
+r = d + b
+puts r
+puts r == 10.10.10.154
+puts "result+=200"
+r+=200
+puts r
+puts r == 10.10.11.99

@@ -14,10 +14,13 @@ require './SecLangCore'
 
 class SecLang < Racc::Parser
 
-module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 239)
+module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 237)
   def initialize
     @syntax_check = false
     @s = SecLangCore.new
+    @state = :MAIN
+    @last_state = []
+    @last_state.push @state
   end
 
   def check_syntax( str )
@@ -29,15 +32,12 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 239)
 
   def parse(str)
     @script = str
-    state = :MAIN
     tokens = []
-    last_state = []
-    last_state.push state
     scanner = StringScanner.new(str)
     
     until scanner.eos?
       case
-        when state == :MAIN
+        when @state == :MAIN
           case
             when m = scanner.scan(/puts/)
               tokens.push [:PUTSTOK, m]
@@ -59,12 +59,15 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 239)
               tokens.push [:RPAREN, m]
             when m = scanner.scan(/\"/)
               tokens.push [:QUOTE, m]
-              last_state.push state
-              state = :QUOTED 
+              @last_state.push @state
+              @state = :QUOTED 
             when m = scanner.scan(/\'/)
               tokens.push [:SINGLE_QUOTE, m]
-              last_state.push state
-              state = :SINGLE_QUOTED
+              @last_state.push @state
+              @state = :SINGLE_QUOTED
+            when m = scanner.scan(/\/\*/)
+              @last_state.push @state
+              @state = :BLOCK_COMMENT
             when m = scanner.scan(/,/)
               tokens.push [:COMMA, m]
             when m = scanner.scan(/==/)
@@ -115,21 +118,29 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 239)
               puts "Syntax error around #{scanner.pos} #{scanner.rest}"
               return -1
           end
-       when state == :QUOTED
+       when @state == :BLOCK_COMMENT
+         case
+           when m = scanner.skip_until(/\*\//)
+             @state = @last_state.pop
+           when m = scanner.scan(/./)
+           when m = scanner.scan(/[\r\n]/)
+             # ignore
+         end
+       when @state == :QUOTED
          case
            when m = scanner.scan(/\"/)
              tokens.push [:QUOTE, m]
-             state = last_state.pop
+             @state = @last_state.pop
            when m = scanner.scan(/[^"]+/)
              tokens.push [:DATA, m]
            when m = scanner.scan(/[ \t\r\n]/)
              # ignore whitespace
          end
-       when state == :SINGLE_QUOTED
+       when @state == :SINGLE_QUOTED
          case
            when m = scanner.scan(/\'/)
              tokens.push [:SINGLE_QUOTE, m]
-             state = last_state.pop
+             @state = @last_state.pop
            when m = scanner.scan(/[^']+/)
              tokens.push [:DATA, m]
            when m = scanner.scan(/[ \t\r\n]/)
@@ -140,8 +151,8 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 239)
     end
     tokens.push [false, false]
 
-    if last_state.size > 1 then
-      puts "Unclosed brackets (#{last_state.pop.to_s})"
+    if @last_state.size > 1 and not @state == :BLOCK_COMMENT then
+      puts "Unclosed brackets (#{@last_state.pop.to_s})"
       return -1
     end
 
@@ -625,7 +636,7 @@ module_eval(<<'.,.,', 'SecLang.y', 70)
 
 module_eval(<<'.,.,', 'SecLang.y', 75)
   def _reduce_18(val, _values, result)
-                 result = puts val[1]
+                 result = @s.sec_puts(val[1])
            
     result
   end
@@ -633,7 +644,7 @@ module_eval(<<'.,.,', 'SecLang.y', 75)
 
 module_eval(<<'.,.,', 'SecLang.y', 80)
   def _reduce_19(val, _values, result)
-                 result = print val[1]
+                 result = @s.sec_print(val[1])
            
     result
   end
@@ -707,7 +718,7 @@ module_eval(<<'.,.,', 'SecLang.y', 119)
 
 # reduce 35 omitted
 
-module_eval(<<'.,.,', 'SecLang.y', 144)
+module_eval(<<'.,.,', 'SecLang.y', 142)
   def _reduce_36(val, _values, result)
     		result = @s.int(val[2])
           
@@ -715,7 +726,7 @@ module_eval(<<'.,.,', 'SecLang.y', 144)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 151)
+module_eval(<<'.,.,', 'SecLang.y', 149)
   def _reduce_37(val, _values, result)
     		result = @s.hex(val[2])
          
@@ -723,7 +734,7 @@ module_eval(<<'.,.,', 'SecLang.y', 151)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 158)
+module_eval(<<'.,.,', 'SecLang.y', 156)
   def _reduce_38(val, _values, result)
     		result = @s.var_type(val[2])
           
@@ -731,7 +742,7 @@ module_eval(<<'.,.,', 'SecLang.y', 158)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 165)
+module_eval(<<'.,.,', 'SecLang.y', 163)
   def _reduce_39(val, _values, result)
     		result = @s.var_set_mode(val[2], val[4])
           
@@ -739,7 +750,7 @@ module_eval(<<'.,.,', 'SecLang.y', 165)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 172)
+module_eval(<<'.,.,', 'SecLang.y', 170)
   def _reduce_40(val, _values, result)
     		result = @s.var_get_mode(val[2])
           
@@ -747,7 +758,7 @@ module_eval(<<'.,.,', 'SecLang.y', 172)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 179)
+module_eval(<<'.,.,', 'SecLang.y', 177)
   def _reduce_41(val, _values, result)
     		result = @s.var_dec(val[0])
           
@@ -755,7 +766,7 @@ module_eval(<<'.,.,', 'SecLang.y', 179)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 184)
+module_eval(<<'.,.,', 'SecLang.y', 182)
   def _reduce_42(val, _values, result)
     		result = @s.var_dec(val[0], val[2])
           
@@ -763,7 +774,7 @@ module_eval(<<'.,.,', 'SecLang.y', 184)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 189)
+module_eval(<<'.,.,', 'SecLang.y', 187)
   def _reduce_43(val, _values, result)
                  	result = @s.var_dec_var(val[0], val[2])
           
@@ -771,7 +782,7 @@ module_eval(<<'.,.,', 'SecLang.y', 189)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 196)
+module_eval(<<'.,.,', 'SecLang.y', 194)
   def _reduce_44(val, _values, result)
     		result = @s.var_inc(val[0])
           
@@ -779,7 +790,7 @@ module_eval(<<'.,.,', 'SecLang.y', 196)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 201)
+module_eval(<<'.,.,', 'SecLang.y', 199)
   def _reduce_45(val, _values, result)
     		result = @s.var_inc(val[0], val[2])
           
@@ -787,7 +798,7 @@ module_eval(<<'.,.,', 'SecLang.y', 201)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 206)
+module_eval(<<'.,.,', 'SecLang.y', 204)
   def _reduce_46(val, _values, result)
                  	result = @s.var_inc_var(val[0], val[2])
           
@@ -795,7 +806,7 @@ module_eval(<<'.,.,', 'SecLang.y', 206)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 213)
+module_eval(<<'.,.,', 'SecLang.y', 211)
   def _reduce_47(val, _values, result)
     		result = @s.add_var(val[0], val[2])
           
@@ -803,7 +814,7 @@ module_eval(<<'.,.,', 'SecLang.y', 213)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 220)
+module_eval(<<'.,.,', 'SecLang.y', 218)
   def _reduce_48(val, _values, result)
     		result = val[1]
          
@@ -811,7 +822,7 @@ module_eval(<<'.,.,', 'SecLang.y', 220)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 224)
+module_eval(<<'.,.,', 'SecLang.y', 222)
   def _reduce_49(val, _values, result)
     		result = val[1]
          

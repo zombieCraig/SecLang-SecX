@@ -46,7 +46,7 @@ class SecLangCore
     else
       raise ParseError, "#{name} not assigned"
     end
-    @var[name].value
+    @var[name]
   end
 
   def var_add(var, amt)
@@ -109,7 +109,7 @@ class SecLangCore
     else
       raise ParseError, "#{name} not assigned"
     end
-    @var[name].value
+    @var[name]
   end
 
   def var_inc_var(dst_name, src_name)
@@ -163,6 +163,30 @@ class SecLangCore
       val
     else
       HexVar.new(val.value)
+    end
+  end
+
+  def sec_puts(var)
+    if var.is_a? TrueClass then
+      puts var
+    elsif var.type == :string then
+      s = var.to_s.dup
+      s.gsub!("\\n", "\n")
+      puts s
+    else
+      puts var
+    end
+  end
+
+  def sec_print(var)
+    if var.is_a? TrueClass then
+      print var
+    elsif var.type == :string then
+      s = var.to_s.dup
+      s.gsub!("\\n", "\n")
+      print s
+    else
+      print var
     end
   end
 

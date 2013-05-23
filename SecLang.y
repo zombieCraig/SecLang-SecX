@@ -73,12 +73,12 @@ rule
            |
            PUTSTOK commands
            {
-             result = puts val[1]
+             result = @s.sec_puts(val[1])
            }
            |
            PRINTTOK commands
            {
-             result = print val[1]
+             result = @s.sec_print(val[1])
            }
            | truth_stmt
            ;
@@ -237,6 +237,9 @@ require './SecLangCore'
   def initialize
     @syntax_check = false
     @s = SecLangCore.new
+    @state = :MAIN
+    @last_state = []
+    @last_state.push @state
   end
 
   def check_syntax( str )
@@ -248,15 +251,12 @@ require './SecLangCore'
 
   def parse(str)
     @script = str
-    state = :MAIN
     tokens = []
-    last_state = []
-    last_state.push state
     scanner = StringScanner.new(str)
     
     until scanner.eos?
       case
-        when state == :MAIN
+        when @state == :MAIN
           case
             when m = scanner.scan(/puts/)
               tokens.push [:PUTSTOK, m]
@@ -278,12 +278,15 @@ require './SecLangCore'
               tokens.push [:RPAREN, m]
             when m = scanner.scan(/\"/)
               tokens.push [:QUOTE, m]
-              last_state.push state
-              state = :QUOTED 
+              @last_state.push @state
+              @state = :QUOTED 
             when m = scanner.scan(/\'/)
               tokens.push [:SINGLE_QUOTE, m]
-              last_state.push state
-              state = :SINGLE_QUOTED
+              @last_state.push @state
+              @state = :SINGLE_QUOTED
+            when m = scanner.scan(/\/\*/)
+              @last_state.push @state
+              @state = :BLOCK_COMMENT
             when m = scanner.scan(/,/)
               tokens.push [:COMMA, m]
             when m = scanner.scan(/==/)
@@ -334,21 +337,29 @@ require './SecLangCore'
               puts "Syntax error around #{scanner.pos} #{scanner.rest}"
               return -1
           end
-       when state == :QUOTED
+       when @state == :BLOCK_COMMENT
+         case
+           when m = scanner.skip_until(/\*\//)
+             @state = @last_state.pop
+           when m = scanner.scan(/./)
+           when m = scanner.scan(/[\r\n]/)
+             # ignore
+         end
+       when @state == :QUOTED
          case
            when m = scanner.scan(/\"/)
              tokens.push [:QUOTE, m]
-             state = last_state.pop
+             @state = @last_state.pop
            when m = scanner.scan(/[^"]+/)
              tokens.push [:DATA, m]
            when m = scanner.scan(/[ \t\r\n]/)
              # ignore whitespace
          end
-       when state == :SINGLE_QUOTED
+       when @state == :SINGLE_QUOTED
          case
            when m = scanner.scan(/\'/)
              tokens.push [:SINGLE_QUOTE, m]
-             state = last_state.pop
+             @state = @last_state.pop
            when m = scanner.scan(/[^']+/)
              tokens.push [:DATA, m]
            when m = scanner.scan(/[ \t\r\n]/)
@@ -359,8 +370,8 @@ require './SecLangCore'
     end
     tokens.push [false, false]
 
-    if last_state.size > 1 then
-      puts "Unclosed brackets (#{last_state.pop.to_s})"
+    if @last_state.size > 1 and not @state == :BLOCK_COMMENT then
+      puts "Unclosed brackets (#{@last_state.pop.to_s})"
       return -1
     end
 
