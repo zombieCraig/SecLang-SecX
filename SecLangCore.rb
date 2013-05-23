@@ -73,8 +73,19 @@ class SecLangCore
 
   def var_add_var(name, src)
     raise ParseError, "Improper math reference" if not src
-    amt = src.to_i
-    self.var_add(name, amt)
+    if name.type == :string then  # String has special properties
+      case src.type
+        when :string
+          name.cat(src.value)
+        when :ipv4
+          name.cat(src.to_s)
+        else
+          self.var_add(name, src.to_i)
+      end
+    else
+      amt = src.to_i
+      self.var_add(name, amt)
+    end
   end
 
   def var_sub_var(name, src)
@@ -155,6 +166,10 @@ class SecLangCore
 
   def int(val)
     IntVar.new(val.to_i)
+  end
+
+  def str(val)
+    StringVar.new(val.to_s)
   end
 
   def hex(val)

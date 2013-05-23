@@ -4,11 +4,10 @@
  */
 puts "SecLang test scripts"
 puts "--------------------"
-print "Test "
-print 1
-puts "."
+test_cnt = 1
+puts "Initial print test " + str(test_cnt) + ".\n\n"
 
-puts "\n" /* Can't handle blank puts yet */
+/* Initialize all of vars */
 puts "a = 3"
 a = 3
 puts "b = 0x90"
@@ -18,7 +17,8 @@ c = "Test"
 puts "d = 10.10.10.10"
 d = 10.10.10.10
 
-puts "\n"
+test_cnt++
+puts "Starting test #" + str(test_cnt) + "\n\n"
 print "a + b = "
 r = a + b
 puts r 
@@ -51,3 +51,7 @@ puts "result+=200"
 r+=200
 puts r
 puts r == 10.10.11.99
+
+puts "\nString + IP"
+r = c + d
+puts r

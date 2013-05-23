@@ -143,6 +143,10 @@ class StringVar < SecVar
     end
   end
 
+  def cat(str)
+    StringVar.new("#{@value}#{str}")
+  end
+
   def set_mode(mode)
     mode = ":#{mode.to_s}" if mode.is_a? Symbol
     case mode

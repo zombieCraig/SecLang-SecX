@@ -132,6 +132,8 @@ command:
            |
            hex_cmd
            |
+           str_cmd
+           |
            vardec_cmd
            |
            varinc_cmd
@@ -143,6 +145,13 @@ backtick_cmd:
           BACKTICK DATA BACKTICK
           {
 		result = @s.shell(val[1])
+          }
+          ;
+
+str_cmd:
+          STRTOK LPAREN truth_stmt RPAREN
+          {
+		result = @s.str(val[2])
           }
           ;
 
@@ -279,6 +288,8 @@ require './SecLangCore'
               tokens.push [:SETMODETOK, m]
             when m = scanner.scan(/int/)
               tokens.push [:INTTOK, m]
+            when m = scanner.scan(/str/)
+              tokens.push [:STRTOK, m]
             when m = scanner.scan(/hex/)
               tokens.push [:HEXTOK, m]
             when m = scanner.scan(/\(/)
