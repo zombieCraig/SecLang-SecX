@@ -36,6 +36,7 @@ class SecLangCore
   end
 
   def var_type(name)
+    raise ParseError, "#{name} not assigned" if not @var.has_key? name
     StringVar.new(@var[name].type.to_s)
   end
 
@@ -188,6 +189,10 @@ class SecLangCore
     else
       print var
     end
+  end
+
+  def shell(cmd)
+    StringVar.new(`#{cmd}`)
   end
 
 end

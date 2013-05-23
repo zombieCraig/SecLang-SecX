@@ -135,7 +135,16 @@ command:
            vardec_cmd
            |
            varinc_cmd
+           |
+           backtick_cmd
            ;
+
+backtick_cmd:
+          BACKTICK DATA BACKTICK
+          {
+		result = @s.shell(val[1])
+          }
+          ;
 
 int_cmd:
           INTTOK LPAREN truth_stmt RPAREN
@@ -329,6 +338,10 @@ require './SecLangCore'
               tokens.push [:ADD, m]
             when m = scanner.scan(/\-/)
               tokens.push [:SUB, m]
+            when m = scanner.scan(/\`/)
+              tokens.push [:BACKTICK, m]
+              @last_state.push @state
+              @state = :BACKTICKS
             when m = scanner.scan(/;/)
               tokens.push [:SEMICOLON, m]
             when scanner.scan(/[ \t\r\n]/)
@@ -344,6 +357,16 @@ require './SecLangCore'
            when m = scanner.scan(/./)
            when m = scanner.scan(/[\r\n]/)
              # ignore
+         end
+       when @state == :BACKTICKS
+         case
+           when m = scanner.scan(/\`/)
+             tokens.push [:BACKTICK, m]
+             @state = @last_state.pop
+           when m = scanner.scan(/[^`]+/)
+             tokens.push [:DATA, m]
+           when m = scanner.scan(/[ \t\r\n]/)
+             # ignore whitespace
          end
        when @state == :QUOTED
          case
