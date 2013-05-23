@@ -14,15 +14,26 @@ puts "d = 10.10.10.10"
 d = 10.10.10.10
 
 print "a + b = "
-puts a + b
+r = a + b
+puts r 
+puts r == 147
 print "b + a = "
-puts b + a
+r = b + a
+puts r
+puts r == 0x93
 print "a + c = "
-puts a + c
+r = a + c
+puts r
+puts r == 3
 print "c + a = "
-puts c + a
+r = c + a
+puts r
+puts r == "Tesw"
 print "d + a = "
-puts d + a
+r = d + a
+puts r
+puts r == 10.10.10.13
 print "a + d = "
-puts a + d
-
+r = a + d
+puts r
+puts r == 3

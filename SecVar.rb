@@ -73,9 +73,11 @@ class StringVar < SecVar
     @mode  = :mixed_case
 
     @lower = "abcdefghijklmnopqrstuvwxyz"
+    @digits = "0123456789"
     @upper = @lower.upcase
     @mixed = @lower + @upper
-    @alphanum = @mixed + "1234567890"
+    @alphanum = @mixed + @digits
+    @hex = @digits + "abcdef"
 
     auto_setmode
   end
@@ -156,6 +158,9 @@ class StringVar < SecVar
       when ":alphanum"
         @mode = :alphanum
         @charset = @alphanum
+      when ":hex"
+        @mode = :hex
+        @charset = @hex
       else
         puts "ERROR: unknown mode type #{mode} for #{@type} var"
     end
@@ -168,7 +173,10 @@ class StringVar < SecVar
     has_lower = @value=~/[a-z]+/ ? true : false
     has_upper = @value=~/[A-Z]+/ ? true : false
     has_symbols = @value=~/[-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]+/ ? true : false
-    if (has_lower or has_upper) and has_digits then
+    has_hex = @value=~/^0x[0-9a-fA-F]+$/ ? true : false
+    if has_hex then
+      self.set_mode(:hex)
+    elsif (has_lower or has_upper) and has_digits then
       self.set_mode(:alphanum) 
     elsif has_lower and has_upper and not has_digits then
       self.set_mode(:mixed_case)

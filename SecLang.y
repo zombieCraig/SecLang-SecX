@@ -20,6 +20,7 @@ rule
            {
              result = @s.var_sub_var(val[1], val[4])
            }
+           | variable_assignment
            | truth_stmt SEMICOLON commands
            | truth_stmt ANDTOK commands
            {
@@ -32,7 +33,7 @@ rule
            |
            truth_stmt EQ commands
            {
-             result = val[0] == val[2]
+             result = @s.is_eq?(val[0], val[2])
            }
            |
            truth_stmt GT commands
@@ -127,12 +128,28 @@ command:
            |
            set_mode_cmd
            |
+           int_cmd
+           |
+           hex_cmd
+           |
            vardec_cmd
            |
            varinc_cmd
-           |
-           variable_assignment
            ;
+
+int_cmd:
+          INTTOK LPAREN truth_stmt RPAREN
+          {
+		result = @s.int(val[2])
+          }
+          ;
+
+hex_cmd:
+         HEXTOK LPAREN truth_stmt RPAREN
+         {
+		result = @s.hex(val[2])
+         }
+         ;
 
 type_cmd:
           TYPETOK LPAREN VAR RPAREN
@@ -190,48 +207,9 @@ varinc_cmd:
           ;
 
 variable_assignment:
-          VAR EQUAL command
+          VAR EQUAL commands
           {
-                r = val[2]
-                if r.is_a? SecVar
-                  result = @s.add_var(val[0], r)
-                elsif r.is_a? Integer
-		  result = @s.add_var(val[0], IntVar.new(val[2]))
-                else r.is_a? String
-		  result = @s.add_var(val[0], StringVar.new(val[2]))
-                end
-		result
-          }
-          |
-          VAR EQUAL VAR
-          {
-		result = @s.copy_var(val[0], val[2])
-          }
-          |
-          VAR EQUAL DIGITS
-          {
-		result = @s.add_var(val[0], IntVar.new(val[2]))
-          }
-          |
-          VAR EQUAL quotedtext
-          {
-		result = @s.add_var(val[0], StringVar.new(val[2]))
-          }
-          |
-          VAR EQUAL IPV4ADDR
-          {
-		result = @s.add_var(val[0], IPv4Var.new(val[2]))
-          }
-          |
-          VAR EQUAL HEXVALUE
-          {
-		result = @s.add_var(val[0], HexVar.new(val[2]))
-          }
-          |
-          VAR EQUAL LPAREN commands RPAREN
-          {
-                t = val[3]
-		result = @s.add_var(val[0], StringVar.new(t.to_s))
+		result = @s.add_var(val[0], val[2])
           }
           ;
 
@@ -290,6 +268,10 @@ require './SecLangCore'
               tokens.push [:GETMODETOK, m]
             when m = scanner.scan(/set_mode/)
               tokens.push [:SETMODETOK, m]
+            when m = scanner.scan(/int/)
+              tokens.push [:INTTOK, m]
+            when m = scanner.scan(/hex/)
+              tokens.push [:HEXTOK, m]
             when m = scanner.scan(/\(/)
               tokens.push [:LPAREN, m]
             when m = scanner.scan(/\)/)

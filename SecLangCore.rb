@@ -7,6 +7,7 @@ class SecLangCore
     @var = {}
   end
 
+  # Adds a variable to the stack
   def add_var(name, var)
     @var[name] = var
   end
@@ -61,7 +62,8 @@ class SecLangCore
         v = StringVar.new(var.value.dup)
         v.inc(amt)
       when :ipv4
-        v = IPv4Var.new(var.value.dup).inc(amt)
+        v = IPv4Var.new(var.value.dup)
+        v.inc(amt)
       else
         raise ParseError, "Unhandled variable type #{var.type}"
     end
@@ -92,7 +94,8 @@ class SecLangCore
         v = StringVar.new(var.value.dup)
         v.dec(amt)
       when :ipv4
-        v = IPv4Var.new(var.value.dup).dec(amt)
+        v = IPv4Var.new(var.value.dup)
+        v.dec(amt)
       else
         raise ParseError, "Unhandled variable type #{var.type}"
     end
@@ -146,8 +149,21 @@ class SecLangCore
   end
 
   def is_eq?(val1, val2)
-    val1 = val2
+    val1.value == val2.value
   end
 
+  def int(val)
+    IntVar.new(val.to_i)
+  end
+
+  def hex(val)
+    if val.is_a? IntVar
+      HexVar.new(val.to_s(16))
+    elsif val.is_a? HexVar
+      val
+    else
+      HexVar.new(val.value)
+    end
+  end
 
 end
