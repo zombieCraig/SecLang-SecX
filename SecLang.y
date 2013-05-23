@@ -69,6 +69,16 @@ rule
            {
              result = @s.var_sub_var(val[0], val[2])
            }
+           |
+           PUTSTOK commands
+           {
+             result = puts val[1]
+           }
+           |
+           PRINTTOK commands
+           {
+             result = print val[1]
+           }
            | truth_stmt
            ;
 
@@ -111,10 +121,6 @@ not_command:
            ;
 
 command:
-           puts_cmd
-           |
-           print_cmd
-           |
            type_cmd
            |
            get_mode_cmd
@@ -127,54 +133,6 @@ command:
            |
            variable_assignment
            ;
-
-puts_cmd:
-          PUTSTOK command
-          {
-		result = puts(val[1])
-          }
-          |
-          PUTSTOK quotedtext
-          {
- 		result = puts(val[1])
-          }
-          |
-          PUTSTOK DIGITS
-          {
-		result = puts(val[1])
-          }
-          |
-          PUTSTOK VAR
-          {
-		result = puts(@s.var_value(val[1]))
-          }
-          |
-          PUTSTOK LPAREN commands RPAREN
-          {
-		result = puts(val[2])
-          }
-          ;
-
-print_cmd:
-          PRINTTOK command
-          {
-		result = print(val[1])
-          }
-          | 
-          PRINTTOK quotedtext
-          {
-		result = print(val[1])
-	  }
-          |
-          PRINTTOK DIGITS
-          {
-		result = print(val[1])
-          }
-          PRINTTOK VAR
-          {
-		result = print(@s.var_value(val[1]))
-          }
-	  ;
 
 type_cmd:
           TYPETOK LPAREN VAR RPAREN

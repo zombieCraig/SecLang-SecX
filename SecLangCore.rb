@@ -50,17 +50,18 @@ class SecLangCore
 
   def var_add(var, amt)
     amt = amt.to_i
+    v = SecVar.new(0)
     case var.type
       when :integer
         v = IntVar.new(var.add(amt))
       when :hex
-        v = HexVar.new(var.value)
+        v = HexVar.new(var.value.dup)
         v.inc(amt)
       when :string
-        v = StringVar.new(var.value)
+        v = StringVar.new(var.value.dup)
         v.inc(amt)
       when :ipv4
-        v = IPv4Var.new(var.value).inc(amt)
+        v = IPv4Var.new(var.value.dup).inc(amt)
       else
         raise ParseError, "Unhandled variable type #{var.type}"
     end
@@ -85,13 +86,13 @@ class SecLangCore
       when :integer
         v = IntVar.new(var.dec(amt))
       when :hex
-        v = HexVar.new(var.value)
+        v = HexVar.new(var.value.dup)
         v.dec(amt)
       when :string
-        v = StringVar.new(var.value)
+        v = StringVar.new(var.value.dup)
         v.dec(amt)
       when :ipv4
-        v = IPv4Var.new(var.value).dec(amt)
+        v = IPv4Var.new(var.value.dup).dec(amt)
       else
         raise ParseError, "Unhandled variable type #{var.type}"
     end

@@ -64,10 +64,10 @@ class IntVar < SecVar
 end
 
 class StringVar < SecVar
-  attr_accessor :value
   attr_reader :type, :mode
 
   def initialize(val)
+    raise "Error: bad val#{val} for String" if not val.is_a? String
     @value = val
     @type = :string
     @mode  = :mixed_case
@@ -76,7 +76,17 @@ class StringVar < SecVar
     @upper = @lower.upcase
     @mixed = @lower + @upper
     @alphanum = @mixed + "1234567890"
-    @charset = @mixed
+
+    auto_setmode
+  end
+
+  def value=(val)
+    @value = val
+    auto_setmode
+  end
+
+  def value
+    @value
   end
 
   def to_i
@@ -90,6 +100,7 @@ class StringVar < SecVar
   def inc(amt=1,pos=-1)
     last_char = @value[pos]
     idx = @charset.index(last_char)
+    raise RuntimeError, "#{last_char} not available for mode #{@mode}" if not idx
     if idx+amt >= @charset.length then
       idx += amt
       div = (idx / @charset.length).floor
@@ -130,11 +141,11 @@ class StringVar < SecVar
     end
   end
 
-
   def set_mode(mode)
+    mode = ":#{mode.to_s}" if mode.is_a? Symbol
     case mode
-      when ":mixed"
-        @mode = :mixed
+      when ":mixed_case"
+        @mode = :mixed_case
         @charset = @mixed
       when ":lower"
         @mode = :lower
@@ -147,6 +158,26 @@ class StringVar < SecVar
         @charset = @alphanum
       else
         puts "ERROR: unknown mode type #{mode} for #{@type} var"
+    end
+  end
+
+  private
+  # Determins mode based on current @value
+  def auto_setmode
+    has_digits = @value =~/\d+/ ? true : false
+    has_lower = @value=~/[a-z]+/ ? true : false
+    has_upper = @value=~/[A-Z]+/ ? true : false
+    has_symbols = @value=~/[-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]+/ ? true : false
+    if (has_lower or has_upper) and has_digits then
+      self.set_mode(:alphanum) 
+    elsif has_lower and has_upper and not has_digits then
+      self.set_mode(:mixed_case)
+    elsif has_lower and not has_upper then
+      self.set_mode(:lower)
+    elsif has_upper and not has_lower then
+      self.set_mode(:upper)
+    else
+      self.set_mode(:mixed_case)
     end
   end
 end

@@ -8,8 +8,14 @@ l = SecLang.new
 
 if ARGV[0] then
   script = File.read(ARGV[0])
+  cnt = 0
   script.each_line do |line|
-     l.parse line
+     cnt+=1
+     begin
+       l.parse line
+     rescue ParseError
+       puts "#{cnt}: #{$!}"
+     end
   end
 else
   quit = false
