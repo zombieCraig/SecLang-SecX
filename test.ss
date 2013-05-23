@@ -52,6 +52,13 @@ r+=200
 puts r
 puts r == 10.10.11.99
 
-puts "\nString + IP"
-r = c + d
+test_cnt++
+puts "\nTest #" + str(test_cnt)
+puts "String command + IP"
+cmd = "ping -c 1 "
+cmd += 172.16.17.1
+puts "Command: " + cmd
+puts "Testing command..."
+r = `$cmd`
+puts "Result:"
 puts r

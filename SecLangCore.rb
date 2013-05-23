@@ -124,14 +124,11 @@ class SecLangCore
     @var[name]
   end
 
-  def var_inc_var(dst_name, src_name)
-    if not @var.has_key? src_name then
-      raise ParseError, "#{src_name} not defined"
-    end
-    if var_type(src_name) != "integer" then
-      raise ParseError, "Can not add #{src_name} of type #{var_type(src_name)}"
-    end
-    var_inc(dst_name, var_value(src_name))
+  def var_inc_var(dst_name, src)
+    raise ParseError, "#{dst_name} not defined" if not @var.has_key? dst_name
+    dst = @var[dst_name]
+    @var[dst_name] = self.var_add_var(dst, src)
+    @var[dst_name]
   end
 
   def var_dec_var(dst_name, src_name)
@@ -183,7 +180,7 @@ class SecLangCore
   end
 
   def sec_puts(var)
-    if var.is_a? TrueClass then
+    if var.is_a? TrueClass or var.is_a? FalseClass then
       puts var
     elsif var.type == :string then
       s = var.to_s.dup
@@ -195,7 +192,7 @@ class SecLangCore
   end
 
   def sec_print(var)
-    if var.is_a? TrueClass then
+    if var.is_a? TrueClass or var.is_a? FalseClass then
       print var
     elsif var.type == :string then
       s = var.to_s.dup
@@ -207,7 +204,21 @@ class SecLangCore
   end
 
   def shell(cmd)
+    cmd = variable_subst(cmd)
     StringVar.new(`#{cmd}`)
+  end
+
+  def variable_subst(str)
+    substs = str.scan(/\$[a-zA-Z][a-zA-Z0-9_]*/)
+    substs.each do |subst|
+      subst.gsub!("$","")
+      if @var.has_key? subst
+        str.gsub!("$#{subst}", @var[subst].to_s)
+      else
+        raise RuntimeError, "Invalid variable substitution of #{subst} in #{str}"
+      end
+    end
+    str
   end
 
 end

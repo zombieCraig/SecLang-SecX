@@ -213,12 +213,12 @@ varinc_cmd:
 		result = @s.var_inc(val[0])
           }
           |
-          VAR VARINCAMT DIGITS
+          /*VAR VARINCAMT DIGITS
           {
 		result = @s.var_inc(val[0], val[2])
           }
-          |
-          VAR VARINCAMT VAR
+          |*/
+          VAR VARINCAMT truth_stmt
           {
              	result = @s.var_inc_var(val[0], val[2])
           }
