@@ -62,3 +62,16 @@ puts "Testing command..."
 r = `$cmd`
 puts "Result:"
 puts r
+
+test_cnt++
+puts "\nTest #$test_cnt (IF/ELSE)"
+puts "if (a == b) { puts 'Match' }"
+if (a == b) { puts "Match" }
+puts "if (a == 3) { puts 'Match' }"
+if (a == 3) { puts "Match" }
+puts "Multiline IF code block"
+if (a == 3) {
+  puts "This comes from a multi-line code-block"
+  puts "a ($a) == 3 was true"
+}
+

@@ -3,7 +3,8 @@ require "./SecVar"
 class SecLangCore
   attr_accessor :var
 
-  def initialize
+  def initialize(parser)
+    @parser = parser
     @var = {}
   end
 
@@ -184,6 +185,7 @@ class SecLangCore
       puts var
     elsif var.type == :string then
       s = var.to_s.dup
+      s = variable_subst(s)
       s.gsub!("\\n", "\n")
       puts s
     else
@@ -196,6 +198,7 @@ class SecLangCore
       print var
     elsif var.type == :string then
       s = var.to_s.dup
+      s = variable_subst(s)
       s.gsub!("\\n", "\n")
       print s
     else
@@ -219,6 +222,19 @@ class SecLangCore
       end
     end
     str
+  end
+
+  def if_stmt(cond, code_blocks)
+    case cond
+      when true
+        @parser.clear_tokens
+        code_blocks.each do |code|
+          @parser.parse code
+        end
+      when false
+      else
+        raise RuntimeError, "Condition not true/false #{cond}"
+    end
   end
 
 end

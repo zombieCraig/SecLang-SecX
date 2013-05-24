@@ -22,6 +22,7 @@ rule
            }
            | variable_assignment
            | truth_stmt SEMICOLON commands
+           | if_stmt
            | truth_stmt ANDTOK commands
            {
              result = val[0] && val[2]
@@ -81,6 +82,13 @@ rule
              result = @s.sec_print(val[1])
            }
            | truth_stmt
+           ;
+
+if_stmt:
+           IFTOK LPAREN commands RPAREN OBRACE BLOCK EBRACE
+           {
+		result = @s.if_stmt(val[2], val[5])
+           }
            ;
 
 truth_stmt:
@@ -254,22 +262,27 @@ require './SecLangCore'
 ---- inner ----    
   def initialize
     @syntax_check = false
-    @s = SecLangCore.new
+    @s = SecLangCore.new(self)
     @state = :MAIN
     @last_state = []
     @last_state.push @state
+  end
+
+  def clear_tokens
+    @tokens = []
   end
 
   def check_syntax( str )
     @syntax_check = true
     res = parse(str)
     @syntax_check = false
+    @tokens = []
     return res
   end
 
   def parse(str)
     @script = str
-    tokens = []
+    @tokens = [] if not @tokens
     scanner = StringScanner.new(str)
     
     until scanner.eos?
@@ -277,84 +290,94 @@ require './SecLangCore'
         when @state == :MAIN
           case
             when m = scanner.scan(/puts/)
-              tokens.push [:PUTSTOK, m]
+              @tokens.push [:PUTSTOK, m]
             when m = scanner.scan(/print/)
-              tokens.push [:PRINTTOK, m]
+              @tokens.push [:PRINTTOK, m]
             when m = scanner.scan(/type/)
-              tokens.push [:TYPETOK, m]
+              @tokens.push [:TYPETOK, m]
             when m = scanner.scan(/mode/)
-              tokens.push [:GETMODETOK, m]
+              @tokens.push [:GETMODETOK, m]
             when m = scanner.scan(/set_mode/)
-              tokens.push [:SETMODETOK, m]
+              @tokens.push [:SETMODETOK, m]
             when m = scanner.scan(/int/)
-              tokens.push [:INTTOK, m]
+              @tokens.push [:INTTOK, m]
             when m = scanner.scan(/str/)
-              tokens.push [:STRTOK, m]
+              @tokens.push [:STRTOK, m]
             when m = scanner.scan(/hex/)
-              tokens.push [:HEXTOK, m]
+              @tokens.push [:HEXTOK, m]
+            when m = scanner.scan(/if/)
+              @tokens.push [:IFTOK, m]
+            when m = scanner.scan(/else/)
+              @tokens.push [:ELSETOK, m]
+            when m = scanner.scan(/{/)
+              @tokens.push [:OBRACE, m]
+              @last_state.push @state
+              @state = :CODE_BLOCK
+              @code_blocks = Array.new
+              @code_segment = String.new
             when m = scanner.scan(/\(/)
-              tokens.push [:LPAREN, m]
+              @tokens.push [:LPAREN, m]
             when m = scanner.scan(/\)/)
-              tokens.push [:RPAREN, m]
+              @tokens.push [:RPAREN, m]
             when m = scanner.scan(/\"/)
-              tokens.push [:QUOTE, m]
+              @tokens.push [:QUOTE, m]
               @last_state.push @state
               @state = :QUOTED 
             when m = scanner.scan(/\'/)
-              tokens.push [:SINGLE_QUOTE, m]
+              @tokens.push [:SINGLE_QUOTE, m]
               @last_state.push @state
               @state = :SINGLE_QUOTED
             when m = scanner.scan(/\/\*/)
               @last_state.push @state
               @state = :BLOCK_COMMENT
             when m = scanner.scan(/,/)
-              tokens.push [:COMMA, m]
+              @tokens.push [:COMMA, m]
             when m = scanner.scan(/==/)
-              tokens.push [:EQ, m]
+              @tokens.push [:EQ, m]
             when m = scanner.scan(/</)
-              tokens.push [:LT, m]
+              @tokens.push [:LT, m]
             when m = scanner.scan(/>/)
-              tokens.push [:GT, m]
+              @tokens.push [:GT, m]
             when m = scanner.scan(/>=/)
-              tokens.push [:GE, m]
+              @tokens.push [:GE, m]
             when m = scanner.scan(/<=/)
-              tokens.push [:LE, m]
+              @tokens.push [:LE, m]
             when m = scanner.scan(/!=/)
-              tokens.push [:NE, m]
+              @tokens.push [:NE, m]
             when m = scanner.scan(/\|\|/)
-              tokens.push [:ORTOK, m]
+              @tokens.push [:ORTOK, m]
             when m = scanner.scan(/&&/)
-              tokens.push [:ANDTOK, m]
+              @tokens.push [:ANDTOK, m]
             when m = scanner.scan(/=/)
-              tokens.push [:EQUAL, m]
+              @tokens.push [:EQUAL, m]
             when m = scanner.scan(/(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/)
-              tokens.push [:IPV4ADDR, m]
+              @tokens.push [:IPV4ADDR, m]
             when m = scanner.scan(/0x[0-9a-fA-F]+/)
-              tokens.push [:HEXVALUE, m]
+              @tokens.push [:HEXVALUE, m]
             when m = scanner.scan(/\+=/)
-              tokens.push [:VARINCAMT, m]
+              @tokens.push [:VARINCAMT, m]
             when m = scanner.scan(/-=/)
-              tokens.push [:VARDECAMT, m]
+              @tokens.push [:VARDECAMT, m]
             when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
-              tokens.push [:SYMBOL, m]
+              @tokens.push [:SYMBOL, m]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*\-\-/)
-              tokens.push [:VARDECTOK, m ]
+              @tokens.push [:VARDECTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*\+\+/)
-              tokens.push [:VARINCTOK, m ]
+              @tokens.push [:VARINCTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*/)
-              tokens.push [:VAR, m]
+              @tokens.push [:VAR, m]
             when m = scanner.scan(/\d+/)
-              tokens.push [:DIGITS, m]
+              @tokens.push [:DIGITS, m]
             when m = scanner.scan(/\+/)
-              tokens.push [:ADD, m]
+              @tokens.push [:ADD, m]
             when m = scanner.scan(/\-/)
-              tokens.push [:SUB, m]
+              @tokens.push [:SUB, m]
             when m = scanner.scan(/\`/)
-              tokens.push [:BACKTICK, m]
+              @tokens.push [:BACKTICK, m]
               @last_state.push @state
               @state = :BACKTICKS
             when m = scanner.scan(/;/)
-              tokens.push [:SEMICOLON, m]
+              @tokens.push [:SEMICOLON, m]
             when scanner.scan(/[ \t\r\n]/)
               # ignore whtiespace
             else
@@ -372,44 +395,63 @@ require './SecLangCore'
        when @state == :BACKTICKS
          case
            when m = scanner.scan(/\`/)
-             tokens.push [:BACKTICK, m]
+             @tokens.push [:BACKTICK, m]
              @state = @last_state.pop
            when m = scanner.scan(/[^`]+/)
-             tokens.push [:DATA, m]
+             @tokens.push [:DATA, m]
            when m = scanner.scan(/[ \t\r\n]/)
              # ignore whitespace
+         end
+       when @state == :CODE_BLOCK
+         case
+            when m = scanner.scan(/}/)
+              @state = @last_state.pop
+              @code_blocks.push @code_segment
+              @tokens.push [:BLOCK, @code_blocks]
+              @tokens.push [:EBRACE, m]
+            when m = scanner.scan(/./)
+              @code_segment += m
+            when m = scanner.scan(/[\r\n]/)
+              @code_blocks.push @code_segment
+              @code_segment = String.new
          end
        when @state == :QUOTED
          case
            when m = scanner.scan(/\"/)
-             tokens.push [:QUOTE, m]
+             @tokens.push [:QUOTE, m]
              @state = @last_state.pop
            when m = scanner.scan(/[^"]+/)
-             tokens.push [:DATA, m]
+             @tokens.push [:DATA, m]
            when m = scanner.scan(/[ \t\r\n]/)
              # ignore whitespace
          end
        when @state == :SINGLE_QUOTED
          case
            when m = scanner.scan(/\'/)
-             tokens.push [:SINGLE_QUOTE, m]
+             @tokens.push [:SINGLE_QUOTE, m]
              @state = @last_state.pop
            when m = scanner.scan(/[^']+/)
-             tokens.push [:DATA, m]
+             @tokens.push [:DATA, m]
            when m = scanner.scan(/[ \t\r\n]/)
              # ignore whitespace
          end
 
        end
     end
-    tokens.push [false, false]
+    #@tokens.push [false, false]
 
-    if @last_state.size > 1 and not @state == :BLOCK_COMMENT then
+    if @last_state.size > 1 and not 
+       (@state == :BLOCK_COMMENT or @state == :CODE_BLOCK) then
       puts "Unclosed brackets (#{@last_state.pop.to_s})"
       return -1
     end
 
-    truth = yyparse(tokens, :each)
+    # Only parse @tokens when back at MAIN
+    if @last_state.size == 1 then
+      @tokens.push [false, false]
+      truth = yyparse(@tokens, :each)
+      @tokens = []
+    end
   end
 
   def on_error(error_token_id, error_value, value_stack)
