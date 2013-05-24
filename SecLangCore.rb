@@ -224,7 +224,7 @@ class SecLangCore
     str
   end
 
-  def if_stmt(cond, code_blocks)
+  def if_stmt(cond, code_blocks, else_blocks=nil)
     case cond
       when true
         @parser.clear_tokens
@@ -232,6 +232,12 @@ class SecLangCore
           @parser.parse code
         end
       when false
+        if else_blocks then
+          @parser.clear_tokens
+          else_blocks.each do |code|
+            @parser.parse code
+          end
+        end
       else
         raise RuntimeError, "Condition not true/false #{cond}"
     end

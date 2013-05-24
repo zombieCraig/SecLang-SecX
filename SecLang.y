@@ -85,6 +85,11 @@ rule
            ;
 
 if_stmt:
+           IFTOK LPAREN commands RPAREN OBRACE BLOCK EBRACE ELSETOK OBRACE BLOCK EBRACE
+           {
+		result = @s.if_stmt(val[2], val[5], val[9])
+           }
+           |
            IFTOK LPAREN commands RPAREN OBRACE BLOCK EBRACE
            {
 		result = @s.if_stmt(val[2], val[5])
@@ -458,6 +463,8 @@ require './SecLangCore'
     msg = "parse error "
     msg << "after #{value_stack.last} " if value_stack.length > 1
     msg << "on #{token_to_str(error_token_id)} #{error_value}"
+    msg << "\n#{@tokens.inspect}"
+    clear_tokens
     raise ParseError, msg
   end
 

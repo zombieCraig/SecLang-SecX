@@ -74,4 +74,12 @@ if (a == 3) {
   puts "This comes from a multi-line code-block"
   puts "a ($a) == 3 was true"
 }
+puts "Else test"
+puts "testing if a ($a) == 8 was true"
+if (a == 8) {
+  puts "This comes from a multi-line code-block"
+} else {
+  puts "a was not == 8"
+}
+
 
