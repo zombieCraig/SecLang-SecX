@@ -50,17 +50,17 @@ rule
            |
            truth_stmt LE commands
            {
-             result = @s.is_le(val[0],val[2])
+             result = @s.is_le?(val[0],val[2])
            }
            |
            truth_stmt GE commands
            {
-             result = @s.is_ge(val[0],val[2])
+             result = @s.is_ge?(val[0],val[2])
            }
            |
            truth_stmt NE commands
            {
-             result = @s.is_ne(val[0],val[2])
+             result = @s.is_ne?(val[0],val[2])
            }
            |
            truth_stmt ADD commands
@@ -353,14 +353,14 @@ require './SecLangCore'
               @tokens.push [:COMMA, m]
             when m = scanner.scan(/==/)
               @tokens.push [:EQ, m]
-            when m = scanner.scan(/</)
-              @tokens.push [:LT, m]
-            when m = scanner.scan(/>/)
-              @tokens.push [:GT, m]
             when m = scanner.scan(/>=/)
               @tokens.push [:GE, m]
             when m = scanner.scan(/<=/)
               @tokens.push [:LE, m]
+            when m = scanner.scan(/</)
+              @tokens.push [:LT, m]
+            when m = scanner.scan(/>/)
+              @tokens.push [:GT, m]
             when m = scanner.scan(/!=/)
               @tokens.push [:NE, m]
             when m = scanner.scan(/\|\|/)

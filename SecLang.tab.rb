@@ -94,14 +94,14 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 277)
               @tokens.push [:COMMA, m]
             when m = scanner.scan(/==/)
               @tokens.push [:EQ, m]
-            when m = scanner.scan(/</)
-              @tokens.push [:LT, m]
-            when m = scanner.scan(/>/)
-              @tokens.push [:GT, m]
             when m = scanner.scan(/>=/)
               @tokens.push [:GE, m]
             when m = scanner.scan(/<=/)
               @tokens.push [:LE, m]
+            when m = scanner.scan(/</)
+              @tokens.push [:LT, m]
+            when m = scanner.scan(/>/)
+              @tokens.push [:GT, m]
             when m = scanner.scan(/!=/)
               @tokens.push [:NE, m]
             when m = scanner.scan(/\|\|/)
@@ -758,7 +758,7 @@ module_eval(<<'.,.,', 'SecLang.y', 47)
 
 module_eval(<<'.,.,', 'SecLang.y', 52)
   def _reduce_15(val, _values, result)
-                 result = @s.is_le(val[0],val[2])
+                 result = @s.is_le?(val[0],val[2])
            
     result
   end
@@ -766,7 +766,7 @@ module_eval(<<'.,.,', 'SecLang.y', 52)
 
 module_eval(<<'.,.,', 'SecLang.y', 57)
   def _reduce_16(val, _values, result)
-                 result = @s.is_ge(val[0],val[2])
+                 result = @s.is_ge?(val[0],val[2])
            
     result
   end
@@ -774,7 +774,7 @@ module_eval(<<'.,.,', 'SecLang.y', 57)
 
 module_eval(<<'.,.,', 'SecLang.y', 62)
   def _reduce_17(val, _values, result)
-                 result = @s.is_ne(val[0],val[2])
+                 result = @s.is_ne?(val[0],val[2])
            
     result
   end

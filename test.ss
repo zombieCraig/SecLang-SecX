@@ -89,4 +89,17 @@ while (a < 8) {
   puts " a=$a"
   a++
 }
+if(a != 8) {
+  puts "Error: a should be 8"
+}
 
+target = 10.10.10.250
+print "Scanning IPs..."
+while(target >= 10.10.11.4) {
+  print "."
+  target++
+}
+puts "Target found $target"
+if (target != 10.10.11.5) {
+  puts "Error: target should be 10.10.11.5"
+}

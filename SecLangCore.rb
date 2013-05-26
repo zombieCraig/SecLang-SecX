@@ -163,19 +163,27 @@ class SecLangCore
   end
 
   def is_lt?(val1, val2)
-    val1.value < val2.value
+    raise RuntimeError, "Comparison of unsimiliar types #{val1.type} #{val2.type}" if val1.type != val2.type
+    return true if val1.compare(val2) < 0
+    false
   end
 
   def is_gt?(val1, val2)
-    val1.value > val2.value
+    raise RuntimeError, "Comparison of unsimiliar types #{val1.type} #{val2.type}" if val1.type != val2.type
+    return true if val1.compare(val2) > 0
+    false
   end
 
   def is_le?(val1, val2)
-    val1.value <= val2.value
+    raise RuntimeError, "Comparison of unsimiliar types #{val1.type} #{val2.type}" if val1.type != val2.type
+    return true if val1.compare(val2) != 1
+    false
   end
 
   def is_ge?(val1, val2)
-    val1.value >= val2.value
+    raise RuntimeError, "Comparison of unsimiliar types #{val1.type} #{val2.type}" if val1.type != val2.type
+    return true if val1.compare(val2) != -1
+    false
   end
 
   def is_ne?(val1, val2)

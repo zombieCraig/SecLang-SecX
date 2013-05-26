@@ -27,6 +27,13 @@ class SecVar
   def dec(amt=0,pos=0)
   end
 
+  # Returns -1 if <, 0 if ==, 1 if >
+  def compare(val)
+    return -1 if @value < val.value 
+    return 1 if @value > val.value 
+    0
+  end
+
 end
 
 class IntVar < SecVar
@@ -238,6 +245,20 @@ class IPv4Var < SecVar
       @value = oct.join(".")
     end
     @value
+  end
+
+  def compare(val)
+    val_oct = val.to_s.split(".")
+    oct = @value.split(".")
+    return -1 if val_oct[0] < oct[0]
+    return 1 if val_oct[0] > oct[0]
+    return -1 if val_oct[1] < oct[1]
+    return 1 if val_oct[1] > oct[1]
+    return -1 if val_oct[2] < oct[2]
+    return 1 if val_oct[2] > oct[2]
+    return -1 if val_oct[3] < oct[3]
+    return 1 if val_oct[3] > oct[3]
+    0
   end
 
 end
