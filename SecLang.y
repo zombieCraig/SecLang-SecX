@@ -23,6 +23,7 @@ rule
            | variable_assignment
            | truth_stmt SEMICOLON commands
            | if_stmt
+           | while_stmt
            | truth_stmt ANDTOK commands
            {
              result = val[0] && val[2]
@@ -39,27 +40,27 @@ rule
            |
            truth_stmt GT commands
            {
-             result = val[0] > val[2]
+             result = @s.is_gt?(val[0],val[2])
            }
            |
            truth_stmt LT commands
            {
-             result = val[0] < val[2]
+             result = @s.is_lt?(val[0],val[2])
            }
            |
            truth_stmt LE commands
            {
-             result = val[0] <= val[2]
+             result = @s.is_le(val[0],val[2])
            }
            |
            truth_stmt GE commands
            {
-             result = val[0] >= val[2]
+             result = @s.is_ge(val[0],val[2])
            }
            |
            truth_stmt NE commands
            {
-             result = val[0] != val[2]
+             result = @s.is_ne(val[0],val[2])
            }
            |
            truth_stmt ADD commands
@@ -93,6 +94,14 @@ if_stmt:
            IFTOK LPAREN commands RPAREN OBRACE BLOCK EBRACE
            {
 		result = @s.if_stmt(val[2], val[5])
+           }
+           ;
+
+while_stmt:
+           WHILETOK LPAREN commands RPAREN OBRACE BLOCK EBRACE
+           {
+                @nested_stack.push @tokens
+ 		result = @s.while_stmt(val[2], val[5])
            }
            ;
 
@@ -265,12 +274,15 @@ require 'strscan'
 require './SecLangCore'
 
 ---- inner ----    
+  attr_accessor :script
+
   def initialize
     @syntax_check = false
     @s = SecLangCore.new(self)
     @state = :MAIN
     @last_state = []
     @last_state.push @state
+    @nested_stack = Array.new
   end
 
   def clear_tokens
@@ -314,6 +326,8 @@ require './SecLangCore'
               @tokens.push [:IFTOK, m]
             when m = scanner.scan(/else/)
               @tokens.push [:ELSETOK, m]
+            when m = scanner.scan(/while/)
+              @tokens.push [:WHILETOK, m]
             when m = scanner.scan(/{/)
               @tokens.push [:OBRACE, m]
               @last_state.push @state
@@ -466,6 +480,11 @@ require './SecLangCore'
     msg << "\n#{@tokens.inspect}"
     clear_tokens
     raise ParseError, msg
+  end
+
+  def loop
+    @tokens = @nested_stack.pop
+    yyparse(@tokens, :each) if @tokens.size > 0
   end
 
 ---- footer ----

@@ -162,6 +162,26 @@ class SecLangCore
     val1.value == val2.value
   end
 
+  def is_lt?(val1, val2)
+    val1.value < val2.value
+  end
+
+  def is_gt?(val1, val2)
+    val1.value > val2.value
+  end
+
+  def is_le?(val1, val2)
+    val1.value <= val2.value
+  end
+
+  def is_ge?(val1, val2)
+    val1.value >= val2.value
+  end
+
+  def is_ne?(val1, val2)
+    val1.value != val2.value
+  end
+
   def int(val)
     IntVar.new(val.to_i)
   end
@@ -240,6 +260,20 @@ class SecLangCore
         end
       else
         raise RuntimeError, "Condition not true/false #{cond}"
+    end
+  end
+
+  def while_stmt(cond, code_blocks)
+    case cond
+      when true
+        @parser.clear_tokens
+        code_blocks.each do |code|
+          @parser.parse code if code.size > 0
+        end
+        @parser.loop
+      when false
+      else
+        raise RuntimeError, "While Condition not true/false #{cond}"
     end
   end
 

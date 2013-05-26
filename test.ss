@@ -82,4 +82,11 @@ if (a == 8) {
   puts "a was not == 8"
 }
 
+test_cnt++
+puts "\nWhile tests #$test_cnt"
+puts "while (a < 8)"
+while (a < 8) {
+  puts " a=$a"
+  a++
+}
 
