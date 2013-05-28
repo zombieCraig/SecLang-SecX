@@ -157,7 +157,16 @@ command:
            backtick_cmd
            |
            call_func
+           |
+           define_func
            ;
+
+define_func:
+          DEFTOK ARGS_DEF RPAREN OBRACE BLOCK EBRACE
+          {
+		result = @s.add_func(val[0], val[1], val[4])
+          }
+          ;
 
 call_func:
           FUNCTOK args RPAREN
@@ -360,8 +369,10 @@ require './SecLangCore'
               @tokens.push [:VARINCAMT, m]
             when m = scanner.scan(/-=/)
               @tokens.push [:VARDECAMT, m]
-            when m = scanner.scan(/def/)
+            when m = scanner.scan(/def [a-zA-Z_][a-zA-Z0-9_]*\(/)
               @tokens.push [:DEFTOK, m]
+              @last_state.push @state
+              @state = :FUNC_DEFINE
             when m = scanner.scan(/[a-zA-Z_][a-zA-Z0-9_]*\(/)
               @tokens.push [:FUNCTOK, m]
             when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
@@ -397,6 +408,16 @@ require './SecLangCore'
            when m = scanner.scan(/./)
            when m = scanner.scan(/[\r\n]/)
              # ignore
+         end
+       when @state == :FUNC_DEFINE
+         case
+           when m = scanner.scan(/\)/)
+             @tokens.push [:RPAREN, m]
+             @state = @last_state.pop
+           when m = scanner.scan(/[^\)]+/)
+             @tokens.push [:ARGS_DEF, m]
+           when m = scanner.scan(/[ \t\r\n]/)
+             # ignore whitespace
          end
        when @state == :BACKTICKS
          case

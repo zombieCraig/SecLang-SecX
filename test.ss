@@ -104,3 +104,12 @@ if (target != 10.10.11.5) {
   puts "Error: target should be 10.10.11.5"
 }
 
+test_cnt++
+puts "Test #$test_cnt : Custom functions"
+puts "Create leet(str) function"
+def leet(test) {
+  puts test
+}
+puts "Use leet to print a string"
+leet("Hi from leet function")
+

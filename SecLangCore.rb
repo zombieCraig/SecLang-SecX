@@ -280,4 +280,16 @@ class SecLangCore
     end
   end
 
+  def add_func(function, args, body)
+    function.gsub!(/\($/, "")
+    function.gsub!(/^def /, "")
+    args.gsub!(/[\s\t]+/, "")
+    args = args.split(',')
+    if not @func.exists? function then
+      return @func.add_func(function, :external, args, body)
+    else
+      raise RuntimeError, "Function #{function} already defined"
+    end
+  end
+
 end

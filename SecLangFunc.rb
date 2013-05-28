@@ -4,9 +4,8 @@ class SecFunc
   def initialize(name, type, args, body)
     @name = name
     @type = type
-    @args = args
+    @def_args = args
     @body = body
-    @vars = {}
     if type == :internal
       @parser = nil
     else
@@ -15,9 +14,15 @@ class SecFunc
   end
 
   def exec(args)
-    @vars = assign_args args
-    @vars.each do |var_name, var_value|
-      @parser.parse "#{var_name} = #{var_value}\n"
+    vars = assign_args args
+    vars.each do |var_name, var_value|
+      if var_value.type == :string then
+        value = "\"#{var_value}\""
+      else
+        value = var_value
+      end
+      init = "#{var_name} = #{value}\n"
+      @parser.parse init
     end
     result = nil
     @body.each do |code|
@@ -29,8 +34,8 @@ class SecFunc
   private
   def assign_args args
     assigned = {}
-    arg_count = 1 # Skip 1st arg (func name)
-    @vars.each do |var|
+    arg_count = 0
+    @def_args.each do |var|
       assigned[var] = args[arg_count] if args[arg_count]
       arg_count += 1
     end
@@ -61,7 +66,7 @@ class SecLangFunc
       f = @funcs[func]
       return self.send(f.body, args[1..args.length-2])
     else
-      return @funcs[func].call(args)
+      return @funcs[func].exec(args[1..args.length-2])
     end
   end
 
