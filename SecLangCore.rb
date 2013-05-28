@@ -160,6 +160,10 @@ class SecLangCore
     @var[name].mode
   end
 
+  def is_match?(val1, val2)
+    val1.value =~ /#{val2.value}/
+  end
+
   def is_eq?(val1, val2)
     val1.value == val2.value
   end
@@ -193,7 +197,9 @@ class SecLangCore
   end
 
   def sec_puts(var)
-    if var.is_a? TrueClass or var.is_a? FalseClass then
+    if var == nil then
+      puts "(nil)"
+    elsif var.is_a? TrueClass or var.is_a? FalseClass then
       puts var
     elsif var.is_a? Symbol then
       puts var.to_s

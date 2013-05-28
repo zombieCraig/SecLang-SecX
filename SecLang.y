@@ -33,6 +33,11 @@ rule
              result = val[0] || val[2]
            }
            |
+           truth_stmt MATCHTOK commands
+           {
+             result = @s.is_match?(val[0], val[2])
+           }
+           |
            truth_stmt EQ commands
            {
              result = @s.is_eq?(val[0], val[2])
@@ -343,6 +348,8 @@ require './SecLangCore'
               @state = :BLOCK_COMMENT
             when m = scanner.scan(/,/)
               @tokens.push [:COMMA, m]
+            when m = scanner.scan(/=~/)
+              @tokens.push [:MATCHTOK, m]
             when m = scanner.scan(/==/)
               @tokens.push [:EQ, m]
             when m = scanner.scan(/>=/)
