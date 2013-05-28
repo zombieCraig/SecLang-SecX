@@ -148,20 +148,28 @@ command:
            |
            get_mode_cmd
            |
-           set_mode_cmd
-           |
-           int_cmd
-           |
-           hex_cmd
-           |
-           str_cmd
-           |
            vardec_cmd
+           |
+           set_mode_cmd
            |
            varinc_cmd
            |
            backtick_cmd
+           |
+           call_func
            ;
+
+call_func:
+          FUNCTOK args RPAREN
+          {
+		result = @s.call_func(val[0], val)
+          }
+          ;
+
+args:    /* empty */ { result = nil }
+          | truth_stmt
+          | truth_stmt COMMA args
+          ; 
 
 backtick_cmd:
           BACKTICK DATA BACKTICK
@@ -169,27 +177,6 @@ backtick_cmd:
 		result = @s.shell(val[1])
           }
           ;
-
-str_cmd:
-          STRTOK LPAREN truth_stmt RPAREN
-          {
-		result = @s.str(val[2])
-          }
-          ;
-
-int_cmd:
-          INTTOK LPAREN truth_stmt RPAREN
-          {
-		result = @s.int(val[2])
-          }
-          ;
-
-hex_cmd:
-         HEXTOK LPAREN truth_stmt RPAREN
-         {
-		result = @s.hex(val[2])
-         }
-         ;
 
 type_cmd:
           TYPETOK LPAREN VAR RPAREN
@@ -316,10 +303,6 @@ require './SecLangCore'
               @tokens.push [:GETMODETOK, m]
             when m = scanner.scan(/set_mode/)
               @tokens.push [:SETMODETOK, m]
-            when m = scanner.scan(/int/)
-              @tokens.push [:INTTOK, m]
-            when m = scanner.scan(/str/)
-              @tokens.push [:STRTOK, m]
             when m = scanner.scan(/hex/)
               @tokens.push [:HEXTOK, m]
             when m = scanner.scan(/if/)
@@ -377,6 +360,10 @@ require './SecLangCore'
               @tokens.push [:VARINCAMT, m]
             when m = scanner.scan(/-=/)
               @tokens.push [:VARDECAMT, m]
+            when m = scanner.scan(/def/)
+              @tokens.push [:DEFTOK, m]
+            when m = scanner.scan(/[a-zA-Z_][a-zA-Z0-9_]*\(/)
+              @tokens.push [:FUNCTOK, m]
             when m = scanner.scan(/:[a-zA-Z][a-zA-Z0-9_-]*/)
               @tokens.push [:SYMBOL, m]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*\-\-/)
@@ -466,11 +453,13 @@ require './SecLangCore'
     end
 
     # Only parse @tokens when back at MAIN
+    truth = nil
     if @last_state.size == 1 then
       @tokens.push [false, false]
       truth = yyparse(@tokens, :each)
       @tokens = []
     end
+    return truth
   end
 
   def on_error(error_token_id, error_value, value_stack)

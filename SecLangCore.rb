@@ -1,10 +1,12 @@
 require "./SecVar"
+require "./SecLangFunc"
 
 class SecLangCore
   attr_accessor :var
 
   def initialize(parser)
     @parser = parser
+    @func = SecLangFunc.new(self)
     @var = {}
   end
 
@@ -190,27 +192,11 @@ class SecLangCore
     val1.value != val2.value
   end
 
-  def int(val)
-    IntVar.new(val.to_i)
-  end
-
-  def str(val)
-    StringVar.new(val.to_s)
-  end
-
-  def hex(val)
-    if val.is_a? IntVar
-      HexVar.new(val.to_s(16))
-    elsif val.is_a? HexVar
-      val
-    else
-      HexVar.new(val.value)
-    end
-  end
-
   def sec_puts(var)
     if var.is_a? TrueClass or var.is_a? FalseClass then
       puts var
+    elsif var.is_a? Symbol then
+      puts var.to_s
     elsif var.type == :string then
       s = var.to_s.dup
       s = variable_subst(s)
@@ -282,6 +268,15 @@ class SecLangCore
       when false
       else
         raise RuntimeError, "While Condition not true/false #{cond}"
+    end
+  end
+
+  def call_func(function, args)
+    function.gsub!(/\($/, "")
+    if @func.exists? function then
+      return @func.call(function, args)
+    else
+      raise RuntimeError, "Unknown function #{function}"
     end
   end
 
