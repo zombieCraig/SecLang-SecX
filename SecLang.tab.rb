@@ -24,6 +24,7 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 278)
     @last_state = []
     @last_state.push @state
     @nested_stack = Array.new
+    @depth = 0
   end
 
   def clear_tokens
@@ -71,6 +72,7 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 278)
               @state = :CODE_BLOCK
               @code_blocks = Array.new
               @code_segment = String.new
+              @depth = 1
             when m = scanner.scan(/\(/)
               @tokens.push [:LPAREN, m]
             when m = scanner.scan(/\)/)
@@ -179,13 +181,23 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 278)
        when @state == :CODE_BLOCK
          case
             when m = scanner.scan(/}/)
-              @state = @last_state.pop
-              @code_blocks.push @code_segment
-              @tokens.push [:BLOCK, @code_blocks]
-              @tokens.push [:EBRACE, m]
+              @depth -= 1
+              if @depth <= 0 then
+                @state = @last_state.pop
+                @code_blocks.push @code_segment
+                @tokens.push [:BLOCK, @code_blocks]
+                @tokens.push [:EBRACE, m]
+                @depth = 0
+              else
+                @code_segment += m
+              end
+            when m = scanner.scan(/{/)
+              @depth+= 1
+              @code_segment += m
             when m = scanner.scan(/./)
               @code_segment += m
             when m = scanner.scan(/[\r\n]/)
+              @code_segment += m
               @code_blocks.push @code_segment
               @code_segment = String.new
          end
@@ -520,8 +532,8 @@ racc_reduce_table = [
   6, 62, :_reduce_43,
   3, 61, :_reduce_44,
   0, 63, :_reduce_45,
-  1, 63, :_reduce_none,
-  3, 63, :_reduce_none,
+  1, 63, :_reduce_46,
+  3, 63, :_reduce_47,
   3, 60, :_reduce_48,
   4, 55, :_reduce_49,
   6, 58, :_reduce_50,
@@ -935,7 +947,7 @@ module_eval(<<'.,.,', 'SecLang.y', 171)
 
 module_eval(<<'.,.,', 'SecLang.y', 178)
   def _reduce_44(val, _values, result)
-    		result = @s.call_func(val[0], val)
+    		result = @s.call_func(val[0], val[1].flatten)
           
     result
   end
@@ -948,9 +960,19 @@ module_eval(<<'.,.,', 'SecLang.y', 182)
   end
 .,.,
 
-# reduce 46 omitted
+module_eval(<<'.,.,', 'SecLang.y', 183)
+  def _reduce_46(val, _values, result)
+     result = [val[0] ] 
+    result
+  end
+.,.,
 
-# reduce 47 omitted
+module_eval(<<'.,.,', 'SecLang.y', 184)
+  def _reduce_47(val, _values, result)
+     result = [val[0], val[2]] 
+    result
+  end
+.,.,
 
 module_eval(<<'.,.,', 'SecLang.y', 190)
   def _reduce_48(val, _values, result)

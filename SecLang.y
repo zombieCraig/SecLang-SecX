@@ -176,13 +176,13 @@ define_func:
 call_func:
           FUNCTOK args RPAREN
           {
-		result = @s.call_func(val[0], val)
+		result = @s.call_func(val[0], val[1].flatten)
           }
           ;
 
 args:    /* empty */ { result = nil }
-          | truth_stmt
-          | truth_stmt COMMA args
+          | truth_stmt { result = [val[0] ] }
+          | truth_stmt COMMA args { result = [val[0], val[2]] } 
           ; 
 
 backtick_cmd:
@@ -284,6 +284,7 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
     @last_state = []
     @last_state.push @state
     @nested_stack = Array.new
+    @depth = 0
   end
 
   def clear_tokens
@@ -331,6 +332,7 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
               @state = :CODE_BLOCK
               @code_blocks = Array.new
               @code_segment = String.new
+              @depth = 1
             when m = scanner.scan(/\(/)
               @tokens.push [:LPAREN, m]
             when m = scanner.scan(/\)/)
@@ -439,13 +441,23 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
        when @state == :CODE_BLOCK
          case
             when m = scanner.scan(/}/)
-              @state = @last_state.pop
-              @code_blocks.push @code_segment
-              @tokens.push [:BLOCK, @code_blocks]
-              @tokens.push [:EBRACE, m]
+              @depth -= 1
+              if @depth <= 0 then
+                @state = @last_state.pop
+                @code_blocks.push @code_segment
+                @tokens.push [:BLOCK, @code_blocks]
+                @tokens.push [:EBRACE, m]
+                @depth = 0
+              else
+                @code_segment += m
+              end
+            when m = scanner.scan(/{/)
+              @depth+= 1
+              @code_segment += m
             when m = scanner.scan(/./)
               @code_segment += m
             when m = scanner.scan(/[\r\n]/)
+              @code_segment += m
               @code_blocks.push @code_segment
               @code_segment = String.new
          end

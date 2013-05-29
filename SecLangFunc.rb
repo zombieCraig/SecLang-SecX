@@ -64,11 +64,14 @@ class SecLangFunc
   def call(func, args)
     if @funcs[func].type == :internal then
       f = @funcs[func]
-      return self.send(f.body, args[1..args.length-2])
+      #return self.send(f.body, args[1..args.length-2])
+      return self.send(f.body, args)
     elsif @funcs[func].type == :callback then
-      return f.body.call args[1..args.length-2]
+      #return f.body.call args[1..args.length-2]
+      return f.body.call args
     else
-      return @funcs[func].exec(args[1..args.length-2])
+      #return @funcs[func].exec(args[1..args.length-2])
+      return @funcs[func].exec(args)
     end
   end
 

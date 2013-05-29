@@ -113,3 +113,12 @@ def leet(test) {
 puts "Use leet to print a string"
 leet("Hi from leet function")
 
+def incAmt(obj, amt) {
+  while( obj != amt) {
+    puts obj
+    obj++
+  }
+}
+
+obj1 = 10.10.10.10
+incAmt(obj1, 10.10.11.10)
