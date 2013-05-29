@@ -1,5 +1,5 @@
-require "./SecVar"
-require "./SecLangFunc"
+require "#{File.dirname(__FILE__)}/SecVar"
+require "#{File.dirname(__FILE__)}/SecLangFunc"
 
 class SecLangCore
   attr_accessor :var
@@ -292,7 +292,11 @@ class SecLangCore
     args.gsub!(/[\s\t]+/, "")
     args = args.split(',')
     if not @func.exists? function then
-      return @func.add_func(function, :external, args, body)
+      if body.is_a? Method then
+        return @func.add_func(function, :callback, args, body)
+      else
+        return @func.add_func(function, :external, args, body)
+      end
     else
       raise RuntimeError, "Function #{function} already defined"
     end

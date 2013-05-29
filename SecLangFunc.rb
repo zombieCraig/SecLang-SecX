@@ -65,6 +65,8 @@ class SecLangFunc
     if @funcs[func].type == :internal then
       f = @funcs[func]
       return self.send(f.body, args[1..args.length-2])
+    elsif @funcs[func].type == :callback then
+      return f.body.call args[1..args.length-2]
     else
       return @funcs[func].exec(args[1..args.length-2])
     end

@@ -2,7 +2,7 @@
 # Test for SecLang
 
 require "readline"
-require "./SecLang.tab"
+require "#{File.dirname(__FILE__)}/SecLang.tab"
 
 l = SecLang.new
 
