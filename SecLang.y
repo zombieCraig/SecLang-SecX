@@ -139,6 +139,11 @@ truth_stmt:
            {
 		result = IPv4Var.new(val[0])
            }
+           |
+           LBRACKET args RBRACKET
+           {
+		result = ArrayVar.new(val[1].flatten)
+           }
            ;
 
 not_command:
@@ -348,6 +353,10 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
             when m = scanner.scan(/\/\*/)
               @last_state.push @state
               @state = :BLOCK_COMMENT
+            when m = scanner.scan(/\[/)
+              @tokens.push [:LBRACKET, m]
+            when m = scanner.scan(/\]/)
+              @tokens.push [:RBRACKET, m]
             when m = scanner.scan(/,/)
               @tokens.push [:COMMA, m]
             when m = scanner.scan(/=~/)

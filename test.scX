@@ -122,3 +122,15 @@ def incAmt(obj, amt) {
 
 obj1 = 10.10.10.10
 incAmt(obj1, 10.10.11.10)
+
+test_cnt++
+puts "Test #$test_cnt: Arrays"
+arr = [ 30, 10.10.10.10, "Hello", 0x50 ]
+puts "Array: $arr"
+array_length = len(arr)
+puts "Array Length: $array_length"
+puts arr + 0x30
+puts arr + "Bye"
+puts arr+= 10.30.40.89
+puts arr
+

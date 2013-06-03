@@ -1,4 +1,5 @@
 require "#{File.dirname(__FILE__)}/SecVar"
+require "#{File.dirname(__FILE__)}/SecDataStruct"
 require "#{File.dirname(__FILE__)}/SecLangFunc"
 
 class SecLangCore
@@ -53,8 +54,8 @@ class SecLangCore
     @var[name]
   end
 
-  def var_add(var, amt)
-    amt = amt.to_i
+  def var_add(var, dst_amt)
+    amt = dst_amt.to_i
     v = SecVar.new(0)
     case var.type
       when :integer
@@ -68,6 +69,9 @@ class SecLangCore
       when :ipv4
         v = IPv4Var.new(var.value.dup)
         v.inc(amt)
+      when :array
+        v = ArrayVar.new(var)
+        v << dst_amt
       else
         raise ParseError, "Unhandled variable type #{var.type}"
     end
@@ -85,6 +89,8 @@ class SecLangCore
         else
           self.var_add(name, src.to_i)
       end
+    elsif name.type == :array then
+      self.var_add(name, src)
     else
       amt = src.to_i
       self.var_add(name, amt)

@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 class SecVar
   attr_accessor :value
   attr_reader :type, :mode
@@ -71,13 +74,14 @@ class IntVar < SecVar
 end
 
 class StringVar < SecVar
-  attr_reader :type, :mode
+  attr_reader :type, :mode, :inject_char
 
   def initialize(val)
     raise "Error: bad val#{val} for String" if not val.is_a? String
     @value = val
     @type = :string
     @mode  = :mixed_case
+    @inject_char = "§"
 
     @lower = "abcdefghijklmnopqrstuvwxyz"
     @digits = "0123456789"
@@ -99,11 +103,11 @@ class StringVar < SecVar
   end
 
   def to_i
-    @value.to_i
+    IntVar.new(@value.to_i)
   end
 
-  def to_i
-    @value.hex.to_i
+  def length
+    IntVar.new(@value.length)
   end
 
   def inc(amt=1,pos=-1)
@@ -275,6 +279,10 @@ class HexVar < StringVar
 
   def to_s
     "0x#{@value}"
+  end
+
+  def to_i
+    IntVar.new(@value.hex.to_i)
   end
 
   def value=(val)

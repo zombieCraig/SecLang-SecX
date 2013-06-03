@@ -55,6 +55,7 @@ class SecLangFunc
     add_func("str", :internal, ["val"], :str)
     add_func("int", :internal, ["val"], :int)
     add_func("hex", :internal, ["val"], :hex)
+    add_func("len", :internal, ["array"], :var_len)
   end
 
   def exists? func
@@ -97,6 +98,15 @@ class SecLangFunc
       val
     else
       HexVar.new(val.value)
+    end
+  end
+
+  def var_len(var)
+    val = var[0]
+    if val.is_a? StringVar or val.is_a? ArrayVar
+      return val.length
+    else
+      raise RuntimeError, "#{var} does not support length queries"
     end
   end
 
