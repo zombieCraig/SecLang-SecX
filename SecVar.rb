@@ -48,6 +48,14 @@ class IntVar < SecVar
     @type = :integer
   end
 
+  def +(amt)
+    self.add amt
+  end
+
+  def -(amt)
+    self.sub amt
+  end
+
   def add(amt)
     @value + amt.to_i
   end
@@ -62,6 +70,15 @@ class IntVar < SecVar
 
   def dec(amt = 1, pos=0)
     @value -= amt
+  end
+
+  # Need for range
+  def succ
+    IntVar.new(@value + 1)
+  end
+
+  def <=>(other)
+    @value <=> other.value 
   end
 
   def to_i

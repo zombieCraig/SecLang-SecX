@@ -56,6 +56,7 @@ class SecLangFunc
     add_func("int", :internal, ["val"], :int)
     add_func("hex", :internal, ["val"], :hex)
     add_func("len", :internal, ["array"], :var_len)
+    add_func("rand", :internal, ["min", "max"], :rand)
   end
 
   def exists? func
@@ -114,6 +115,15 @@ class SecLangFunc
     else
       raise RuntimeError, "#{var} does not support length queries"
     end
+  end
+
+  # TODO: Update for Flaot later
+  def rand(args)
+    rains RuntimeError, "rand takes 2 arguments" if not args.size == 2
+    min = args[0]
+    max = args[1]
+    prng = Random.new
+    IntVar.new(prng.rand(min..max))
   end
 
 end
