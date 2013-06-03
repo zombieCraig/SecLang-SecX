@@ -26,7 +26,7 @@ else
     else
       begin
         v = l.parse line
-        puts " [ #{v} ]" if v
+        puts "-> #{v}" if v
       rescue ParseError
         puts $!
       end

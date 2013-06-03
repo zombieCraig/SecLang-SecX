@@ -21,6 +21,11 @@ class ArrayVar < SecVar
     ArrayVar.new(@values)
   end
 
+  def slice(index)
+    index = index.to_i
+    @values[index]
+  end
+
   def push val
     @values << val
     ArrayVar.new(@values)

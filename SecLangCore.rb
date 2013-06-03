@@ -166,6 +166,18 @@ class SecLangCore
     @var[name].mode
   end
 
+  def slice_var(name, index)
+    if @var.has_key? name then
+      if @var[name].class.method_defined? :slice then
+        return @var[name].slice(index)
+      else
+        raise RuntimeError, "#{@var[name].class} does not support array indexing"
+      end
+    else
+      raise ParseError, "#{name} not assigned"
+    end
+  end
+
   def is_match?(val1, val2)
     val1.value =~ /#{val2.value}/
   end

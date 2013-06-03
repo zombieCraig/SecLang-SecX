@@ -140,6 +140,11 @@ truth_stmt:
 		result = IPv4Var.new(val[0])
            }
            |
+           VAR LBRACKET truth_stmt RBRACKET
+           {
+		result = @s.slice_var(val[0], val[2])
+           }
+           |
            LBRACKET args RBRACKET
            {
 		result = ArrayVar.new(val[1].flatten)
@@ -401,7 +406,7 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
               @tokens.push [:VARINCTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*/)
               @tokens.push [:VAR, m]
-            when m = scanner.scan(/\d+/)
+            when m = scanner.scan(/[\-0-9]+/)
               @tokens.push [:DIGITS, m]
             when m = scanner.scan(/\+/)
               @tokens.push [:ADD, m]
