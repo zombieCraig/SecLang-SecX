@@ -106,9 +106,23 @@ class StringVar < SecVar
     IntVar.new(@value.to_i)
   end
 
+  def to_hex
+    if @value=~/^0x/ then
+      HexVar.new(@value)
+    else 
+      HexVar.new("0x#{@value.unpack('H*')[0]}")
+    end
+  end
+
   def length
     IntVar.new(@value.length)
   end
+
+  def slice(index)
+    index = index.to_i
+    StringVar.new(@value[index])
+  end
+
 
   def inc(amt=1,pos=-1)
     last_char = @value[pos]
@@ -279,6 +293,10 @@ class HexVar < StringVar
 
   def to_s
     "0x#{@value}"
+  end
+
+  def to_ascii
+    [@value].pack("H*")
   end
 
   def to_i

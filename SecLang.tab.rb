@@ -58,8 +58,6 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 288)
               @tokens.push [:GETMODETOK, m]
             when m = scanner.scan(/set_mode/)
               @tokens.push [:SETMODETOK, m]
-            when m = scanner.scan(/hex/)
-              @tokens.push [:HEXTOK, m]
             when m = scanner.scan(/if/)
               @tokens.push [:IFTOK, m]
             when m = scanner.scan(/else/)

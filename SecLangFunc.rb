@@ -83,7 +83,11 @@ class SecLangFunc
 
   private
   def str(args)
-    return StringVar.new(args[0].to_s)
+    if args[0].is_a? HexVar then
+      args[0].to_ascii
+    else
+      return StringVar.new(args[0].to_s)
+    end
   end
 
   def int(args)
@@ -96,6 +100,8 @@ class SecLangFunc
       HexVar.new(val.to_s(16))
     elsif val.is_a? HexVar
       val
+    elsif val.class.method_defined? :to_hex then
+      val.to_hex
     else
       HexVar.new(val.value)
     end
