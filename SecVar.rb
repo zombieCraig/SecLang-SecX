@@ -94,7 +94,7 @@ class StringVar < SecVar
   attr_reader :type, :mode, :inject_char
 
   def initialize(val)
-    raise "Error: bad val#{val} for String" if not val.is_a? String
+    raise "Error: bad val#{val} (#{val.class}) for String" if not val.is_a? String
     @value = val
     @type = :string
     @mode  = :mixed_case
@@ -140,6 +140,25 @@ class StringVar < SecVar
     StringVar.new(@value[index])
   end
 
+  def succ
+    s = StringVar.new(@value.dup)
+    s.inc
+    s
+  end
+
+  def <=>(other)
+    return 0 if @value == other.value
+    return -1 if @value.size < other.value.size
+    return 1 if @value.size > other.value.size
+    idx = 0
+    (idx..@value.size).each do |x|
+      pos = @charset.index(@value[x])
+      other_pos = @charset.index(@value[x])
+      return -1 if pos < other_pos
+      return 1 if pos > other_post
+    end
+    0
+  end
 
   def inc(amt=1,pos=-1)
     last_char = @value[pos]

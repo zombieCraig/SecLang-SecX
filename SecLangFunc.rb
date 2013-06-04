@@ -1,3 +1,6 @@
+require 'digest'
+require 'uri'
+
 class SecFunc
   attr_reader :name, :type, :args, :body
  
@@ -57,6 +60,12 @@ class SecLangFunc
     add_func("hex", :internal, ["val"], :hex)
     add_func("len", :internal, ["array"], :var_len)
     add_func("rand", :internal, ["min", "max"], :rand)
+    add_func("md5", :internal, ["str"], :to_md5)
+    add_func("sha256", :internal, ["str"], :to_sha256)
+    add_func("uuencode", :internal, ["str"], :uuencode)
+    add_func("uudecode", :internal, ["uu"], :uudecode)
+    add_func("urlencode", :internal, ["str"], :uri_encode)
+    add_func("urldecode", :internal, ["str"], :uri_decode)
   end
 
   def exists? func
@@ -115,6 +124,30 @@ class SecLangFunc
     else
       raise RuntimeError, "#{var} does not support length queries"
     end
+  end
+
+  def to_md5(args)
+    StringVar.new(Digest::MD5.hexdigest(args[0].to_s))
+  end
+
+  def to_sha256(args)
+    StringVar.new(Digest::SHA256.hexdigest(args[0].to_s))
+  end
+
+  def uuencode(args)
+    StringVar.new([args[0].value].pack('u*'))
+  end
+
+  def uudecode(args)
+    StringVar.new(args[0].value.unpack('u*')[0])
+  end
+
+  def uri_encode(args)
+    StringVar.new(URI.escape(args[0].value))
+  end
+
+  def uri_decode(args)
+    StringVar.new(URI.unescape(args[0].value))
   end
 
   # TODO: Update for Flaot later

@@ -78,6 +78,11 @@ rule
              result = @s.var_sub_var(val[0], val[2])
            }
            |
+           truth_stmt RANGETOK truth_stmt
+           {
+		result = @s.var_range(val[0], val[2])
+           }
+           |
            PUTSTOK commands
            {
              result = @s.sec_puts(val[1])
@@ -328,6 +333,8 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
               @tokens.push [:GETMODETOK, m]
             when m = scanner.scan(/set_mode/)
               @tokens.push [:SETMODETOK, m]
+            when m = scanner.scan(/\.\./)
+              @tokens.push [:RANGETOK, m]
             when m = scanner.scan(/if/)
               @tokens.push [:IFTOK, m]
             when m = scanner.scan(/else/)

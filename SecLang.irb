@@ -29,6 +29,7 @@ else
         puts "-> #{v}" if v
       rescue ParseError, RuntimeError
         puts $!
+        l.clear_tokens
       end
     end
   end

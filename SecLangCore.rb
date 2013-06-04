@@ -178,6 +178,13 @@ class SecLangCore
     end
   end
 
+  def var_range(start, stop)
+    raise RuntimeError, "Can not perform a range translation from two different types of variables." if not start.class == stop.class
+    raise RuntimeError, "Can not iterate #{start.class}" if not start.class.method_defined? :succ
+    raise RuntimeError, "Can not iterate #{stop.class}" if not stop.class.method_defined? :succ
+    ArrayVar.new((start..stop).to_a)
+  end
+
   def is_match?(val1, val2)
     val1.value =~ /#{val2.value}/
   end
