@@ -125,6 +125,11 @@ truth_stmt:
 		result = StringVar.new(val[0])
            }
            |
+           FLOAT
+           {
+		result = FloatVar.new(val[0])
+           }
+           |
            DIGITS
            {
 		result = IntVar.new(val[0])
@@ -391,6 +396,8 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
               @tokens.push [:EQUAL, m]
             when m = scanner.scan(/(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/)
               @tokens.push [:IPV4ADDR, m]
+            when m = scanner.scan(/\-{0,1}[0-9]+\.[0-9]+/)
+              @tokens.push [:FLOAT, m]
             when m = scanner.scan(/0x[0-9a-fA-F]+/)
               @tokens.push [:HEXVALUE, m]
             when m = scanner.scan(/\+=/)
@@ -411,7 +418,7 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
               @tokens.push [:VARINCTOK, m ]
             when m = scanner.scan(/[a-zA-Z][a-zA-Z0-9_]*/)
               @tokens.push [:VAR, m]
-            when m = scanner.scan(/[\-0-9]+/)
+            when m = scanner.scan(/\-{0,1}[0-9]+/)
               @tokens.push [:DIGITS, m]
             when m = scanner.scan(/\+/)
               @tokens.push [:ADD, m]
@@ -427,7 +434,8 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
               # ignore whtiespace
             else
               puts "Syntax error around #{scanner.pos} #{scanner.rest}"
-              return -1
+              clear_tokens
+              return nil
           end
        when @state == :BLOCK_COMMENT
          case

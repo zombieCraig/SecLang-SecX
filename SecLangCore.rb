@@ -55,11 +55,17 @@ class SecLangCore
   end
 
   def var_add(var, dst_amt)
-    amt = dst_amt.to_i
+    if not dst_amt.type == :float then
+      amt = dst_amt.to_i
+    else
+      amt = dst_amt
+    end
     v = SecVar.new(0)
     case var.type
       when :integer
         v = IntVar.new(var.add(amt))
+      when :float
+        v = FloatVar.new(var.add(amt))
       when :hex
         v = HexVar.new(var.value.dup)
         v.inc(amt)
@@ -92,22 +98,34 @@ class SecLangCore
     elsif name.type == :array then
       self.var_add(name, src)
     else
-      amt = src.to_i
+      if not src.type == :float then
+        amt = src.to_i
+      else
+        amt = src
+      end
       self.var_add(name, amt)
     end
   end
 
-  def var_sub_var(name, src)
+  def var_sub_var(var, src)
     raise ParseError, "Improper math reference" if not src
-    amt = src.to_i
-    self.var_sub(name, amt)
+    if not src.type == :float then
+      amt = src.to_i
+    else
+      amt = src
+    end
+    self.var_sub(var, amt)
   end
 
   def var_sub(var, amt)
-    amt = amt.to_i
+    if not amt.type == :float then
+      amt = amt.to_i
+    end
     case var.type
       when :integer
-        v = IntVar.new(var.dec(amt))
+        v = IntVar.new(var.sub(amt))
+      when :float
+        v = FloatVar.new(var.sub(amt))
       when :hex
         v = HexVar.new(var.value.dup)
         v.dec(amt)

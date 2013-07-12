@@ -18,6 +18,9 @@ class SecVar
   def to_i
   end
 
+  def to_f
+  end
+
   def add(amt)
   end
 
@@ -44,31 +47,43 @@ class IntVar < SecVar
   attr_reader :type
 
   def initialize(val)
-    @value = val.to_i
+    if val.is_a? Fixnum then
+      @value = val
+    elsif val.is_a? IntVar then
+      @value = val.value
+    else
+      @value = val.to_i
+    end
     @type = :integer
   end
 
   def +(amt)
+    amt = amt.value if amt.is_a? IntVar
     self.add amt
   end
 
   def -(amt)
+    amt = amt.value if amt.is_a? IntVar
     self.sub amt
   end
 
   def add(amt)
+    amt = amt.value if amt.is_a? IntVar
     @value + amt.to_i
   end
 
   def sub(amt)
+    amt = amt.value if amt.is_a? IntVar
     @value - amt.to_i
   end
 
   def inc(amt = 1, pos=0)
+    amt = amt.value if amt.is_a? IntVar
     @value += amt
   end
 
   def dec(amt = 1, pos=0)
+    amt = amt.value if amt.is_a? IntVar
     @value -= amt
   end
 
@@ -82,12 +97,73 @@ class IntVar < SecVar
   end
 
   def to_i
+    return IntVar.new(@value) if not @value.is_a? IntVar
+    @value
+  end
+
+  def to_f
+    @value.to_f
+  end
+
+  def set_mode
+    puts "WARNING: mode is unsupported on type #{type} vars"
+  end
+end
+
+class FloatVar < SecVar
+  attr_accessor :value
+  attr_reader :type
+
+  def initialize(val)
+    @value = val.to_f
+    @type = :float
+  end
+
+  def +(amt)
+    self.add amt
+  end
+
+  def -(amt)
+    self.sub amt
+  end
+
+  def add(amt)
+    @value + amt.to_f
+  end
+
+  def sub(amt)
+    @value - amt.to_f
+  end
+
+  def inc(amt = 1, pos=0)
+    @value += amt
+  end
+
+  def dec(amt = 1, pos=0)
+    @value -= amt
+  end
+
+  # Need for range
+  def succ
+    FloatVar.new(@value + 1)
+  end
+
+  def <=>(other)
+    @value <=> other.value 
+  end
+
+  def to_i
+    @value.to_i
+  end
+
+  def to_f
     @value
   end
 
   def set_mode
     puts "WARNING: mode is unsupported on type #{type} vars"
   end
+
 end
 
 class StringVar < SecVar
