@@ -21,6 +21,15 @@ class ArrayVar < SecVar
     ArrayVar.new(@values)
   end
 
+  def concat(arr)
+    arr = arr.values if arr.is_a? ArrayVar
+    if arr.is_a? Array then
+      @values.concat arr
+    else
+      raise RuntimeError, "Can only concat Arrays (#{arr.class})"
+    end
+  end
+
   def slice(index)
     index = index.to_i
     @values[index]

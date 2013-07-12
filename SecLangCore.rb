@@ -54,6 +54,75 @@ class SecLangCore
     @var[name]
   end
 
+  def var_mult(var, dst_amt)
+    if not dst_amt.type == :float then
+      amt = dst_amt.to_i
+    else
+      amt = dst_amt
+    end
+    v = SecVar.new(0)
+    case var.type
+      when :integer
+        v = var.mult(amt)
+      when :float
+        v = var.mult(amt)
+      when :hex
+        v = var.mult(amt)
+      when :string
+        v = var.mult(amt)
+      when :ipv4
+        v = IPv4Var.new(var.value.dup)
+        v.mult(amt)
+      when :array
+        v = ArrayVar.new(var)
+        if amt > 0 then
+          (0..amt.value).each do
+            v.concat var
+          end
+        end
+      else
+        raise ParseError, "Unhandled variable type #{var.type}"
+    end
+    v
+  end
+
+  def var_div(var, dst_amt)
+    if not dst_amt.type == :float then
+      amt = dst_amt.to_i
+    else
+      amt = dst_amt
+    end
+    v = SecVar.new(0)
+    case var.type
+      when :integer
+        v = IntVar.new(var.div(amt))
+      when :float
+        v = FloatVar.new(var.div(amt))
+      when :hex
+        v = HexVar.new(var.value.dup)
+        v.div(amt)
+      when :string
+        v = StringVar.new(var.value.dup)
+        v.div(amt)
+      when :ipv4
+        v = IPv4Var.new(var.value.dup)
+        v.div(amt)
+      when :array
+        v = ArrayVar.new(var)
+        if dst_amt > 0 then
+          if dst_amt < v.size then
+            len = v.size / dst_amt
+            v = v[0, len]
+          else
+            v = ArrayVar.new()
+          end
+        end
+      else
+        raise ParseError, "Unhandled variable type #{var.type}"
+    end
+    v
+  end
+
   def var_add(var, dst_amt)
     if not dst_amt.type == :float then
       amt = dst_amt.to_i
@@ -105,6 +174,26 @@ class SecLangCore
       end
       self.var_add(name, amt)
     end
+  end
+
+  def var_mult_var(var, src)
+    raise ParseError, "Improper math reference" if not src
+    if not src.type == :float then
+      amt = src.to_i
+    else
+      amt = src
+    end
+    self.var_mult(var, amt)
+  end
+
+  def var_div_var(var, src)
+    raise ParseError, "Improper math reference" if not src
+    if not src.type == :float then
+      amt = src.to_i
+    else
+      amt = src
+    end
+    self.var_div(var, amt)
   end
 
   def var_sub_var(var, src)

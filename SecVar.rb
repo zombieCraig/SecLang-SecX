@@ -27,6 +27,12 @@ class SecVar
   def sub(amt)
   end
 
+  def mult(amt)
+  end
+
+  def div(amt)
+  end
+
   def inc(amt=0,pos=0)
   end
 
@@ -57,6 +63,23 @@ class IntVar < SecVar
     @type = :integer
   end
 
+  def >(obj)
+    if obj.is_a? FloatVar then
+      return @value > obj.value
+    else
+      return @value > obj.to_i
+    end
+  end
+
+  def <(obj)
+    if obj.is_a? FloatVar then
+      return @value < obj.value
+    else
+      return @value < obj.to_i
+    end
+  end
+
+
   def +(amt)
     amt = amt.value if amt.is_a? IntVar
     self.add amt
@@ -75,6 +98,14 @@ class IntVar < SecVar
   def sub(amt)
     amt = amt.value if amt.is_a? IntVar
     @value - amt.to_i
+  end
+
+  def mult(amt)
+    amt = amt.value if amt.is_a? IntVar
+    if amt.is_a? FloatVar then
+      return FloatVar.new(@value * amt.value)
+    end
+    IntVar.new(@value * amt.to_i)
   end
 
   def inc(amt = 1, pos=0)
@@ -135,6 +166,13 @@ class FloatVar < SecVar
     @value - amt.to_f
   end
 
+  def mult(amt)
+    if amt.is_a? FloatVar then
+      return FloatVar.new(@value * amt.value)
+    end
+    FloatVar.new(@value * amt.to_i.value)
+  end
+
   def inc(amt = 1, pos=0)
     @value += amt
   end
@@ -169,7 +207,7 @@ end
 class StringVar < SecVar
   attr_reader :type, :mode, :inject_char
 
-  def initialize(val)
+  def initialize(val="")
     raise "Error: bad val#{val} (#{val.class}) for String" if not val.is_a? String
     @value = val
     @type = :string
@@ -234,6 +272,17 @@ class StringVar < SecVar
       return 1 if pos > other_post
     end
     0
+  end
+
+  def mult(amt)
+    i = amt.to_i.value
+    v = StringVar.new
+    if i > 0 then
+      (1..i).each do
+        v = v.cat @value
+      end
+    end
+    v
   end
 
   def inc(amt=1,pos=-1)
@@ -397,8 +446,12 @@ class HexVar < StringVar
   attr_reader :type, :mode
 
   def initialize(val)
-    val = val.gsub(/0x/, "")
-    @value = val.downcase
+    if val.is_a? String
+      val = val.gsub(/0x/, "")
+      @value = val.downcase
+    elsif val.is_a? Fixnum
+      @value = val.to_s(16) 
+    end
     @type = :hex
     @charset = "0123456789abcdef"
   end
@@ -413,6 +466,11 @@ class HexVar < StringVar
 
   def to_i
     IntVar.new(@value.hex.to_i)
+  end
+
+  def mult(amt)
+    i = to_i
+    HexVar.new(i.value * amt.to_i.value)
   end
 
   def value=(val)

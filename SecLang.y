@@ -20,6 +20,14 @@ rule
            {
              result = @s.var_sub_var(val[1], val[4])
            }
+           | LPAREN commands RPAREN MULT commands
+           {
+             result = @s.var_mult_var(val[1], val[4])
+           }
+           | LPAREN commands RPAREN DIV commands
+           {
+             result = @s.var_div_var(val[1], val[4])
+           }
            | variable_assignment
            | truth_stmt SEMICOLON commands
            | if_stmt
@@ -76,6 +84,16 @@ rule
            truth_stmt SUB commands
            {
              result = @s.var_sub_var(val[0], val[2])
+           }
+           |
+           truth_stmt MULT commands
+           {
+             result = @s.var_mult_var(val[0], val[2])
+           }
+           |
+           truth_stmt DIV commands
+           {
+             result = @s.var_div_var(val[0], val[2])
            }
            |
            truth_stmt RANGETOK truth_stmt
@@ -424,6 +442,10 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
               @tokens.push [:ADD, m]
             when m = scanner.scan(/\-/)
               @tokens.push [:SUB, m]
+            when m = scanner.scan(/\*/)
+              @tokens.push [:MULT, m]
+            when m = scanner.scan(/\\/)
+              @tokens.push [:DIV, m]
             when m = scanner.scan(/\`/)
               @tokens.push [:BACKTICK, m]
               @last_state.push @state
