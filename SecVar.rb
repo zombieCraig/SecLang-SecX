@@ -108,6 +108,15 @@ class IntVar < SecVar
     IntVar.new(@value * amt.to_i)
   end
 
+  def div(amt)
+    if amt.is_a? IntVar or amt.is_a? FloatVar
+      amt = amt.value
+    else
+      amt = amt.to_i
+    end
+    FloatVar.new(@value.to_f / amt.to_f)
+  end
+
   def inc(amt = 1, pos=0)
     amt = amt.value if amt.is_a? IntVar
     @value += amt
@@ -172,6 +181,16 @@ class FloatVar < SecVar
     end
     FloatVar.new(@value * amt.to_i.value)
   end
+
+  def div(amt)
+    if amt.is_a? IntVar or amt.is_a? FloatVar
+      amt = amt.value
+    else
+      amt = amt.to_i
+    end
+    FloatVar.new(@value.to_f / amt.to_f)
+  end
+
 
   def inc(amt = 1, pos=0)
     @value += amt
@@ -329,6 +348,10 @@ class StringVar < SecVar
     end
   end
 
+  def +(str)
+    self.cat(str)
+  end
+
   def cat(str)
     StringVar.new("#{@value}#{str}")
   end
@@ -472,6 +495,12 @@ class HexVar < StringVar
     i = to_i
     HexVar.new(i.value * amt.to_i.value)
   end
+
+  def div(amt)
+    i = to_i
+    HexVar.new((i.value.to_f / amt.to_i.value.to_f).to_i)
+  end
+
 
   def value=(val)
     val = val.gsub(/0x/, "")

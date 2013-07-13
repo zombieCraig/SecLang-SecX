@@ -66,6 +66,9 @@ class SecLangFunc
     add_func("uudecode", :internal, ["uu"], :uudecode)
     add_func("urlencode", :internal, ["str"], :uri_encode)
     add_func("urldecode", :internal, ["str"], :uri_decode)
+    add_func("fail", :internal, ["str"], :fail)
+    add_func("info", :internal, ["str"], :info)
+    add_func("pass", :internal, ["str"], :pass)
   end
 
   def exists? func
@@ -150,13 +153,27 @@ class SecLangFunc
     StringVar.new(URI.unescape(args[0].value))
   end
 
-  # TODO: Update for Flaot later
   def rand(args)
     rains RuntimeError, "rand takes 2 arguments" if not args.size == 2
     min = args[0]
     max = args[1]
     prng = Random.new
-    IntVar.new(prng.rand(min..max))
+    FloatVar.new(prng.rand(min..max))
+  end
+
+  def info(msg)
+    m = StringVar.new(" [ - ] ") + msg[0]
+    @core.sec_puts(m)
+  end
+
+  def pass(msg)
+    m = StringVar.new(" [ + ] ") + msg[0]
+    @core.sec_puts(m)
+  end
+
+  def fail(msg)
+    m = StringVar.new(" [ ! ] ") + msg[0]
+    @core.sec_puts(m)
   end
 
 end

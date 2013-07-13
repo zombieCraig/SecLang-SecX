@@ -444,7 +444,7 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
               @tokens.push [:SUB, m]
             when m = scanner.scan(/\*/)
               @tokens.push [:MULT, m]
-            when m = scanner.scan(/\\/)
+            when m = scanner.scan(/\//)
               @tokens.push [:DIV, m]
             when m = scanner.scan(/\`/)
               @tokens.push [:BACKTICK, m]

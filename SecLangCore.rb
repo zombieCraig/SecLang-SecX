@@ -95,12 +95,11 @@ class SecLangCore
     v = SecVar.new(0)
     case var.type
       when :integer
-        v = IntVar.new(var.div(amt))
+        v = var.div(amt)
       when :float
-        v = FloatVar.new(var.div(amt))
+        v = var.div(amt)
       when :hex
-        v = HexVar.new(var.value.dup)
-        v.div(amt)
+        v = var.div(amt)
       when :string
         v = StringVar.new(var.value.dup)
         v.div(amt)

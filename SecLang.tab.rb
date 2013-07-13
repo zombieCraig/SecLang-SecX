@@ -146,7 +146,7 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 316)
               @tokens.push [:SUB, m]
             when m = scanner.scan(/\*/)
               @tokens.push [:MULT, m]
-            when m = scanner.scan(/\\/)
+            when m = scanner.scan(/\//)
               @tokens.push [:DIV, m]
             when m = scanner.scan(/\`/)
               @tokens.push [:BACKTICK, m]
