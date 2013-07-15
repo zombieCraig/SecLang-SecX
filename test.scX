@@ -8,49 +8,77 @@ test_cnt = 1
 puts "Initial print test " + str(test_cnt) + ".\n\n"
 
 /* Initialize all of vars */
-puts "a = 3"
+test = "a = 3"
 a = 3
-puts "b = 0x90"
+if(a == 3) {
+  pass(test)
+} else {
+  fail(test)
+}
+test = "b = 0x90"
 b = 0x90
-puts 'c = "Test"'
+if(b == 0x90) {
+  pass(test)
+} else {
+  fail(test)
+}
+test = 'c = "Test"'
 c = "Test"
-puts "d = 10.10.10.10"
+if(c == "Test") {
+  pass(test)
+} else {
+  fail(test)
+}
+test = "d = 10.10.10.10"
 d = 10.10.10.10
+if(d == 10.10.10.10) {
+  pass(test)
+} else {
+  fail(test)
+}
 
 test_cnt++
 puts "Starting test #" + str(test_cnt) + "\n\n"
 print "a + b = "
 r = a + b
 puts r 
-puts r == 147
+if( r == 147) {
+  pass("result is 147")
+} else {
+  fail("Result is not 147, $r")
+}
 print "b + a = "
 r = b + a
 puts r
-puts r == 0x93
+if(r == 0x93) {
+  pass("result is 0x93")
+} else {
+  fail("result is not 0x93, $r")
+}
 print "a + c = "
 r = a + c
 puts r
-puts r == 3
+if(r == 3) { pass("result is 3") } else { fail("result is not 3, $r") }
 print "c + a = "
 r = c + a
 puts r
-puts r == "Tesw"
+if(r == "Tesw") { pass("result is 'Tesw'") } else { fail("result is not 'Tesw', $r") }
 print "d + a = "
 r = d + a
 puts r
-puts r == 10.10.10.13
+if(r == 10.10.10.13) { pass("result is 10.10.10.13") } else { fail("result is not 10.10.10.13, $r") }
 print "a + d = "
 r = a + d
 puts r
-puts r == 3
+if(r == 3) { pass("result is 3") } else { fail("result is not 3, $r") }
 print "d + b = "
 r = d + b
 puts r
-puts r == 10.10.10.154
+if(r == 10.10.10.154) { pass("result is 10.10.10.154") } else { fail("result is not 10.10.10.154, $r") }
 puts "result+=200"
 r+=200
 puts r
-puts r == 10.10.11.99
+if(r == 10.10.11.99) { pass("result is 10.10.11.99") } else { fail("result is not 10.10.11.99, $r") }
 
 test_cnt++
 puts "\nTest #" + str(test_cnt)

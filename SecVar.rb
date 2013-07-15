@@ -16,9 +16,11 @@ class SecVar
   end
 
   def to_i
+    IntVar.new
   end
 
   def to_f
+    FloatVar.new
   end
 
   def add(amt)
@@ -52,8 +54,10 @@ class IntVar < SecVar
   attr_accessor :value
   attr_reader :type
 
-  def initialize(val)
-    if val.is_a? Fixnum then
+  def initialize(val = nil)
+    if val == nil
+      @value = 0
+    elsif val.is_a? Fixnum then
       @value = val
     elsif val.is_a? IntVar then
       @value = val.value
@@ -154,8 +158,12 @@ class FloatVar < SecVar
   attr_accessor :value
   attr_reader :type
 
-  def initialize(val)
-    @value = val.to_f
+  def initialize(val=nil)
+    if val == nil then
+      @value = 0.0
+    else
+      @value = val.to_f
+    end
     @type = :float
   end
 
@@ -308,6 +316,7 @@ class StringVar < SecVar
     last_char = @value[pos]
     idx = @charset.index(last_char)
     raise RuntimeError, "#{last_char} not available for mode #{@mode}" if not idx
+    amt = amt.value
     if idx+amt >= @charset.length then
       idx += amt
       div = (idx / @charset.length).floor
@@ -414,6 +423,7 @@ class IPv4Var < SecVar
   end
 
   def inc(amt = 1, pos = 3)
+    amt = amt.value if amt.is_a? IntVar
     oct = @value.split(".")
     if pos < 0 then
       @value = "0.0.0.0"
