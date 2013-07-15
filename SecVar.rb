@@ -297,6 +297,14 @@ class StringVar < SecVar
     colorize(37)
   end
 
+  def bold
+    StringVar.new("\e[1m#{@value}\e[22m")
+  end
+
+  def blink
+    StringVar.new("\e[5m#{@value}\e[22m")
+  end
+
   def to_i
     IntVar.new(@value.to_i)
   end

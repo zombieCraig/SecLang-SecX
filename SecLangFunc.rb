@@ -70,6 +70,16 @@ class SecLangFunc
     add_func("info", :internal, ["str"], :info)
     add_func("pass", :internal, ["str"], :pass)
     add_func("color", :internal, ["str"], :set_color)
+    add_func("blink", :internal, ["str"], :blink)
+    add_func("bold", :internal, ["str"], :bold)
+    add_func("black", :internal, ["str"], :black)
+    add_func("red", :internal, ["str"], :red)
+    add_func("green", :internal, ["str"], :green)
+    add_func("yellow", :internal, ["str"], :yellow)
+    add_func("blue", :internal, ["str"], :blue)
+    add_func("magenta", :internal, ["str"], :magenta)
+    add_func("cyan", :internal, ["str"], :cyan)
+    add_func("grey", :internal, ["str"], :grey)
   end
 
   def exists? func
@@ -205,4 +215,93 @@ class SecLangFunc
     @core.color_level
   end
 
+  def blink(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.blink
+  end
+
+  def bold(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.bold
+  end
+
+  def black(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.black
+  end
+
+  def red(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.red
+  end
+
+  def green(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.green
+  end
+
+  def yellow(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.yellow
+  end
+
+  def blue(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.blue
+  end
+
+  def magenta(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.magenta
+  end
+
+  def cyan(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.cyan
+  end
+
+  def grey(args)
+     return if not args
+     return args[0] if @core.color == :none
+     str = args[0]
+     str = args[0].to_s if not args[0].is_a? StringVar
+     return if not str.is_a? StringVar
+     str.grey
+  end
 end
