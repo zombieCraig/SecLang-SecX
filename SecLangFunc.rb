@@ -69,6 +69,7 @@ class SecLangFunc
     add_func("fail", :internal, ["str"], :fail)
     add_func("info", :internal, ["str"], :info)
     add_func("pass", :internal, ["str"], :pass)
+    add_func("color", :internal, ["str"], :set_color)
   end
 
   def exists? func
@@ -162,18 +163,46 @@ class SecLangFunc
   end
 
   def info(msg)
-    m = StringVar.new(" [ - ] ") + msg[0]
+    if @core.color == :none then
+      m = StringVar.new(" [ - ] ") + msg[0]
+    else
+      m = StringVar.new(" [ ").grey + StringVar.new("-").set_color(0) + StringVar.new(" ] ").grey + msg[0]
+    end
     @core.sec_puts(m)
   end
 
   def pass(msg)
-    m = StringVar.new(" [ + ] ") + msg[0]
+    if @core.color == :none then
+      m = StringVar.new(" [ + ] ") + msg[0]
+    else
+      m = StringVar.new(" [ ").grey + StringVar.new("+").green + StringVar.new(" ] ").grey + msg[0]
+    end
     @core.sec_puts(m)
   end
 
   def fail(msg)
-    m = StringVar.new(" [ ! ] ") + msg[0]
+    if @core.color == :none then
+      m = StringVar.new(" [ ! ] ") + msg[0]
+    else
+      m = StringVar.new(" [ ").grey + StringVar.new("!").red + StringVar.new(" ] ").grey + msg[0]
+    end
     @core.sec_puts(m)
+  end
+
+  def set_color(args)
+    return @core.color_level if args.size == 0
+    level = args[0]
+    case level.value
+    when "none", "off"
+      @core.color = :none
+    when "on"
+      @core.color = :on
+    when "full"
+      @core.color = :full
+    else
+      raise RuntimeError, "Unknown color state #{level}"
+    end
+    @core.color_level
   end
 
 end

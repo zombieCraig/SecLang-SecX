@@ -214,7 +214,11 @@ define_func:
 call_func:
           FUNCTOK args RPAREN
           {
-		result = @s.call_func(val[0], val[1].flatten)
+                if val[1] then
+			result = @s.call_func(val[0], val[1].flatten)
+		else
+			result = @s.call_func(val[0], Array.new)
+		end
           }
           ;
 
@@ -323,6 +327,11 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
     @last_state.push @state
     @nested_stack = Array.new
     @depth = 0
+  end
+
+  def color(level)
+    @s.color = level
+    @s.color
   end
 
   def clear_tokens

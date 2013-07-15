@@ -14,7 +14,7 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
 
 class SecLang < Racc::Parser
 
-module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 316)
+module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 320)
   attr_accessor :script
 
   def initialize
@@ -25,6 +25,11 @@ module_eval(<<'...end SecLang.y/module_eval...', 'SecLang.y', 316)
     @last_state.push @state
     @nested_stack = Array.new
     @depth = 0
+  end
+
+  def color(level)
+    @s.color = level
+    @s.color
   end
 
   def clear_tokens
@@ -1114,34 +1119,38 @@ module_eval(<<'.,.,', 'SecLang.y', 209)
 
 module_eval(<<'.,.,', 'SecLang.y', 216)
   def _reduce_52(val, _values, result)
-    		result = @s.call_func(val[0], val[1].flatten)
+                    if val[1] then
+			result = @s.call_func(val[0], val[1].flatten)
+		else
+			result = @s.call_func(val[0], Array.new)
+		end
           
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 220)
+module_eval(<<'.,.,', 'SecLang.y', 224)
   def _reduce_53(val, _values, result)
      result = nil 
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 221)
+module_eval(<<'.,.,', 'SecLang.y', 225)
   def _reduce_54(val, _values, result)
      result = [val[0] ] 
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 222)
+module_eval(<<'.,.,', 'SecLang.y', 226)
   def _reduce_55(val, _values, result)
      result = [val[0], val[2]] 
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 228)
+module_eval(<<'.,.,', 'SecLang.y', 232)
   def _reduce_56(val, _values, result)
     		result = @s.shell(val[1])
           
@@ -1149,7 +1158,7 @@ module_eval(<<'.,.,', 'SecLang.y', 228)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 235)
+module_eval(<<'.,.,', 'SecLang.y', 239)
   def _reduce_57(val, _values, result)
     		result = @s.var_type(val[2])
           
@@ -1157,7 +1166,7 @@ module_eval(<<'.,.,', 'SecLang.y', 235)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 242)
+module_eval(<<'.,.,', 'SecLang.y', 246)
   def _reduce_58(val, _values, result)
     		result = @s.var_set_mode(val[2], val[4])
           
@@ -1165,7 +1174,7 @@ module_eval(<<'.,.,', 'SecLang.y', 242)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 249)
+module_eval(<<'.,.,', 'SecLang.y', 253)
   def _reduce_59(val, _values, result)
     		result = @s.var_get_mode(val[2])
           
@@ -1173,7 +1182,7 @@ module_eval(<<'.,.,', 'SecLang.y', 249)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 256)
+module_eval(<<'.,.,', 'SecLang.y', 260)
   def _reduce_60(val, _values, result)
     		result = @s.var_dec(val[0])
           
@@ -1181,7 +1190,7 @@ module_eval(<<'.,.,', 'SecLang.y', 256)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 261)
+module_eval(<<'.,.,', 'SecLang.y', 265)
   def _reduce_61(val, _values, result)
     		result = @s.var_dec(val[0], val[2])
           
@@ -1189,7 +1198,7 @@ module_eval(<<'.,.,', 'SecLang.y', 261)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 266)
+module_eval(<<'.,.,', 'SecLang.y', 270)
   def _reduce_62(val, _values, result)
                  	result = @s.var_dec_var(val[0], val[2])
           
@@ -1197,7 +1206,7 @@ module_eval(<<'.,.,', 'SecLang.y', 266)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 273)
+module_eval(<<'.,.,', 'SecLang.y', 277)
   def _reduce_63(val, _values, result)
     		result = @s.var_inc(val[0])
           
@@ -1205,7 +1214,7 @@ module_eval(<<'.,.,', 'SecLang.y', 273)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 283)
+module_eval(<<'.,.,', 'SecLang.y', 287)
   def _reduce_64(val, _values, result)
                  	result = @s.var_inc_var(val[0], val[2])
           
@@ -1213,7 +1222,7 @@ module_eval(<<'.,.,', 'SecLang.y', 283)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 290)
+module_eval(<<'.,.,', 'SecLang.y', 294)
   def _reduce_65(val, _values, result)
     		result = @s.add_var(val[0], val[2])
           
@@ -1221,7 +1230,7 @@ module_eval(<<'.,.,', 'SecLang.y', 290)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 297)
+module_eval(<<'.,.,', 'SecLang.y', 301)
   def _reduce_66(val, _values, result)
     		result = val[1]
          
@@ -1229,7 +1238,7 @@ module_eval(<<'.,.,', 'SecLang.y', 297)
   end
 .,.,
 
-module_eval(<<'.,.,', 'SecLang.y', 301)
+module_eval(<<'.,.,', 'SecLang.y', 305)
   def _reduce_67(val, _values, result)
     		result = val[1]
          

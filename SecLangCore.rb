@@ -3,12 +3,26 @@ require "#{File.dirname(__FILE__)}/SecDataStruct"
 require "#{File.dirname(__FILE__)}/SecLangFunc"
 
 class SecLangCore
-  attr_accessor :var
+  attr_accessor :var, :color
 
   def initialize(parser)
     @parser = parser
     @func = SecLangFunc.new(self)
     @var = {}
+    @color = :none
+  end
+
+  def color_level
+    case @color
+    when :none
+      return StringVar.new("none")
+    when :on
+      return StringVar.new("on")
+    when :full
+      return StringVar.new("full")
+    else
+      return StringVar.new("unknown state: #{@color}")
+    end
   end
 
   # Adds a variable to the stack
@@ -123,6 +137,7 @@ class SecLangCore
   end
 
   def var_add(var, dst_amt)
+    dst_amt = IntVar.new(dst_amt) if dst_amt.is_a? Fixnum
     if not dst_amt.type == :float then
       amt = dst_amt.to_i
     else

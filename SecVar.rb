@@ -240,6 +240,7 @@ class StringVar < SecVar
     @type = :string
     @mode  = :mixed_case
     @inject_char = "§"
+    @color = nil
 
     @lower = "abcdefghijklmnopqrstuvwxyz"
     @digits = "0123456789"
@@ -258,6 +259,42 @@ class StringVar < SecVar
 
   def value
     @value
+  end
+
+  def set_color(val)
+    colorize(val)
+  end
+
+  def black
+    colorize(30)
+  end
+
+  def red
+    colorize(31)
+  end
+
+  def green
+    colorize(32)
+  end
+
+  def yellow
+    colorize(33)
+  end
+
+  def blue
+    colorize(34)
+  end
+
+  def magenta
+    colorize(35)
+  end
+
+  def cyan
+    colorize(36)
+  end
+
+  def grey
+    colorize(37)
   end
 
   def to_i
@@ -410,6 +447,10 @@ class StringVar < SecVar
       self.set_mode(:mixed_case)
     end
   end
+
+  def colorize(val)
+    StringVar.new("\e[#{val}m#{@value}\e[0m")
+  end
 end
 
 class IPv4Var < SecVar
@@ -424,6 +465,7 @@ class IPv4Var < SecVar
 
   def inc(amt = 1, pos = 3)
     amt = amt.value if amt.is_a? IntVar
+    amt = amt.to_i if amt.is_a? FloatVar
     oct = @value.split(".")
     if pos < 0 then
       @value = "0.0.0.0"
@@ -442,6 +484,8 @@ class IPv4Var < SecVar
   end
 
   def dec(amt = 1, pos = 3)
+    amt = amt.value if amt.is_a? IntVar
+    amt = amt.to_i if amt.is_a? FloatVar
     oct = @value.split(".")
     if pos < 0 then
       @value = "255.255.255.255"

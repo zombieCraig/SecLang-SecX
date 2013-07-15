@@ -5,6 +5,7 @@ require "readline"
 require "#{File.dirname(__FILE__)}/SecLang.tab"
 
 l = SecLang.new
+l.color(:on)
 
 if ARGV[0] then
   script = File.read(ARGV[0])

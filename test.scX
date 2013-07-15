@@ -36,6 +36,13 @@ if(d == 10.10.10.10) {
 } else {
   fail(test)
 }
+test = "e = 3.14"
+e = 3.14
+if(e == 3.14) {
+  pass(test)
+} else {
+  fail(test)
+}
 
 test_cnt++
 puts "Starting test #" + str(test_cnt) + "\n\n"
@@ -79,6 +86,25 @@ puts "result+=200"
 r+=200
 puts r
 if(r == 10.10.11.99) { pass("result is 10.10.11.99") } else { fail("result is not 10.10.11.99, $r") }
+print "a + e = "
+r = a + e
+puts r
+print "e + a = "
+r = e + a
+puts r
+print "b + e = "
+r = b + e
+puts r
+print "c + e = "
+r = c + e
+puts r
+print "d + e = "
+r = d + e
+puts r
+print "e + e = "
+r = e + e
+puts r
+
 
 test_cnt++
 puts "\nTest #" + str(test_cnt)
