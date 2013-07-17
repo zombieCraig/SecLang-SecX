@@ -3,7 +3,7 @@ require "#{File.dirname(__FILE__)}/SecDataStruct"
 require "#{File.dirname(__FILE__)}/SecLangFunc"
 
 class SecLangCore
-  attr_accessor :var, :color
+  attr_accessor :var, :color, :parser
 
   def initialize(parser)
     @parser = parser
@@ -355,6 +355,7 @@ class SecLangCore
       s.gsub!("\\n", "\n")
       puts s
     else
+      var = var.auto_color if @color == :full
       puts var
     end
   end
@@ -368,6 +369,7 @@ class SecLangCore
       s.gsub!("\\n", "\n")
       print s
     else
+      var = var.auto_color if @color == :full
       print var
     end
   end
@@ -382,7 +384,11 @@ class SecLangCore
     substs.each do |subst|
       subst.gsub!("$","")
       if @var.has_key? subst
-        str.gsub!("$#{subst}", @var[subst].to_s)
+        if @color == :full then
+          str.gsub!("$#{subst}", @var[subst].auto_color.value)
+        else
+          str.gsub!("$#{subst}", @var[subst].to_s)
+        end
       else
         raise RuntimeError, "Invalid variable substitution of #{subst} in #{str}"
       end

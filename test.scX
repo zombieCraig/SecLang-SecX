@@ -7,6 +7,10 @@ puts "--------------------"
 test_cnt = 1
 puts "Initial print test " + str(test_cnt) + ".\n\n"
 
+print "Enabling full color..."
+color("full")
+puts "Enabled"
+
 /* Initialize all of vars */
 test = "a = 3"
 a = 3

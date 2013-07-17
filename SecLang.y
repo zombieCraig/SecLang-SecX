@@ -327,11 +327,15 @@ require "#{File.dirname(__FILE__)}/SecLangCore"
     @last_state.push @state
     @nested_stack = Array.new
     @depth = 0
+    @color = :none
   end
 
-  def color(level)
+  def color(level=nil)
+    return @color if not level
+    @color = level
     @s.color = level
     @s.color
+    @color
   end
 
   def clear_tokens

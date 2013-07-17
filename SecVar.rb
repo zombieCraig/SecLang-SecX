@@ -41,6 +41,10 @@ class SecVar
   def dec(amt=0,pos=0)
   end
 
+  def auto_color
+    StringVar.new(@value)
+  end
+
   # Returns -1 if <, 0 if ==, 1 if >
   def compare(val)
     return -1 if @value < val.value 
@@ -65,6 +69,10 @@ class IntVar < SecVar
       @value = val.to_i
     end
     @type = :integer
+  end
+
+  def auto_color
+    StringVar.new(to_s).red.bold
   end
 
   def >(obj)
@@ -167,6 +175,11 @@ class FloatVar < SecVar
     @type = :float
   end
 
+  def auto_color
+    parts = to_s.split(".")
+    StringVar.new(parts[0]).red.bold + StringVar.new(".").bold + StringVar.new(parts[1]).red
+  end
+
   def +(amt)
     self.add amt
   end
@@ -235,6 +248,7 @@ class StringVar < SecVar
   attr_reader :type, :mode, :inject_char
 
   def initialize(val="")
+    val = "" if val == nil
     raise "Error: bad val#{val} (#{val.class}) for String" if not val.is_a? String
     @value = val
     @type = :string
@@ -298,7 +312,7 @@ class StringVar < SecVar
   end
 
   def bold
-    StringVar.new("\e[1m#{@value}\e[22m")
+    StringVar.new("\e[1m#{@value}\e[22m\e[30m\e[0m")
   end
 
   def blink
@@ -361,7 +375,7 @@ class StringVar < SecVar
     last_char = @value[pos]
     idx = @charset.index(last_char)
     raise RuntimeError, "#{last_char} not available for mode #{@mode}" if not idx
-    amt = amt.value
+    amt = amt.value if amt.is_a? IntVar
     if idx+amt >= @charset.length then
       idx += amt
       div = (idx / @charset.length).floor
@@ -471,6 +485,17 @@ class IPv4Var < SecVar
     @mode = "N/A"
   end
 
+  def auto_color
+    oct = @value.split(".")
+    new_oct = []
+    v = StringVar.new
+    oct.each do |o|
+      new_oct << StringVar.new(o).blue.bold
+    end
+    dot = StringVar.new('.').bold
+    new_oct[0] + dot + new_oct[1] + dot + new_oct[2] + dot + new_oct[3]
+  end
+
   def inc(amt = 1, pos = 3)
     amt = amt.value if amt.is_a? IntVar
     amt = amt.to_i if amt.is_a? FloatVar
@@ -543,6 +568,10 @@ class HexVar < StringVar
 
   def to_s
     "0x#{@value}"
+  end
+
+  def auto_color
+    StringVar.new("0x").green + StringVar.new(@value).green.bold
   end
 
   def to_ascii

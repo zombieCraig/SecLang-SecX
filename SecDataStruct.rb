@@ -31,7 +31,7 @@ class ArrayVar < SecVar
   end
 
   def slice(index)
-    index = index.to_i
+    index = index.to_i.value
     @values[index]
   end
 
@@ -65,6 +65,18 @@ class ArrayVar < SecVar
       s = "#{s}," if not cnt == @values.length
     end
     s = "#{s} ]"
+    s
+  end
+
+  def auto_color
+    s = StringVar.new("[").bold
+    cnt = 0
+    @values.each do |val|
+      s += val.auto_color
+      cnt += 1
+      s += StringVar.new(",").bold if not cnt == @values.length
+    end
+    s += StringVar.new(" ]").bold
     s
   end
 

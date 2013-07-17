@@ -3,6 +3,7 @@ require 'uri'
 
 class SecFunc
   attr_reader :name, :type, :args, :body
+  attr_accessor :parser
  
   def initialize(name, type, args, body)
     @name = name
@@ -96,6 +97,8 @@ class SecLangFunc
       return f.body.call args
     else
       #return @funcs[func].exec(args[1..args.length-2])
+      # ensure color setting is up to date
+      @funcs[func].parser.color(@core.color)
       return @funcs[func].exec(args)
     end
   end
@@ -103,6 +106,9 @@ class SecLangFunc
   def add_func(name, type, args, body)
     raise RuntimeError "#{name} function already exists" if @funcs.has_key? name
     @funcs[name] = SecFunc.new(name, type, args, body)
+    if not type == :internal then
+      @funcs[name].parser.color(@core.color) #inherit color
+    end
   end
 
   private
