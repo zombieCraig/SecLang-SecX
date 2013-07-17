@@ -80,6 +80,14 @@ Valid options for set_mode(&lt;var>, :&lt;mode>)
 * :upper
 * :hex (although you should create an actual hex varible instead)
 
+Varaibles can also be directly used in strings by adding a $ in front:
+```
+> home = 127.0.0.1
+-> 127.0.0.1
+> puts "I am $home"
+I am 127.0.0.1
+```
+
 Methods
 -------
 * mode(&lt;str>) - Gets the mod eof a string
