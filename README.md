@@ -73,7 +73,7 @@ Strings increment in a brute-force style, example: aa, ab, ac, etc.  The
 character set used in incrementing is auto-detected.  You can view the
 mode of the string with mode() and change it with set_mode()
 
-Valid options for set_mode(<var>, :<mode>)
+Valid options for set_mode(&lt;var>, :&lt;mode>)
 * :mixed_case
 * :alphanum
 * :lower
@@ -82,41 +82,41 @@ Valid options for set_mode(<var>, :<mode>)
 
 Methods
 -------
-* mode(<str>) - Gets the mod eof a string
-* set_mode(<str>, :<mode>) - Sets the mode (see above)
-* type(<var>) - Returns the variable type
-* int(<var>) - converts to an integer
-* hex(<var>) - converts to a hex
-* str(<var>) - converts to a string
+* mode(&lt;str>) - Gets the mod eof a string
+* set_mode(&lt;str>, :&lt;mode>) - Sets the mode (see above)
+* type(&lt;var>) - Returns the variable type
+* int(&lt;var>) - converts to an integer
+* hex(&lt;var>) - converts to a hex
+* str(&lt;var>) - converts to a string
 * (backticks) - Used to execute code on the shell
 * puts, print - prints to the console with or w/o a newline respectively
-* len(<var>) - Returns length of a string or an array
-* rand(<min>, <max>) - Return a random number from min to max
-* md5(<str>) - Creates an md5 hash of <str>
-* sha256(<str>) - Creates a sha256 has of <str>
+* len(&lt;var>) - Returns length of a string or an array
+* rand(&lt;min>, &lt;max>) - Return a random number from min to max
+* md5(&lt;str>) - Creates an md5 hash of &lt;str>
+* sha256(&lt;str>) - Creates a sha256 has of &lt;str>
 * uuencode/uudecode - UU Encodes or Decodes a string
 * urlencode/urldecode - Url Encodes or Decodes a string
 * fail, info, pass - Logging functions that print a string
-* color(<mode>) - Sets default color output to: none, on or full
+* color(&lt;mode>) - Sets default color output to: none, on or full
 * black, red, green, yellow, blue, magenta, cyan, grey, bold - sets colors
-* def <function>(<arg>,<arg>,...) { } - define your own functions/methods
+* def &lt;function>(&lt;arg>,&lt;arg>,...) { } - define your own functions/methods
 
 Conditions
 ----------
-if (condition) { <code> }
-if (condition) { <code> } else { <code>}
+if (condition) { &lt;code> }
+if (condition) { &lt;code> } else { &lt;code>}
 Conditions:
 * ==
 * !=
 * >
-* <
+* &lt;
 * >=
-* <=
+* &lt;=
 * =~ (regex matching)
 
 Iterators
 ---------
-while(condition) { <code> }
+while(condition) { &lt;code> }
 
 Data Structures
 ---------------
